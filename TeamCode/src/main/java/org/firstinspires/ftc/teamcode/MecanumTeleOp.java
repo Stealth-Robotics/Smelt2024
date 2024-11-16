@@ -18,10 +18,7 @@ public class MecanumTeleOp extends LinearOpMode {
         float armSetting = 0;
         double speedModifier = 1;
 
-        final float OUTPUT_LIFT_DOWN = 1;
-        final float OUTPUT_LIFT_CLIP_PICKUP = 0.8246f;
-        final float OUTPUT_LIFT_CLIP_SCORE = 0.9183f;
-        final float OUTPUT_LIFT_BUCKET = 0.6275f;
+       float OUTPUT_LIFT_POSITION = 0;
 
 
         DcMotor frontLeftMotor = hardwareMap.dcMotor.get("frontleftmotor");
@@ -29,12 +26,15 @@ public class MecanumTeleOp extends LinearOpMode {
         DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontrightmotor");
         DcMotor backRightMotor = hardwareMap.dcMotor.get("backrightmotor");
 
-        Servo IntakeLift = hardwareMap.servo.get("intakelift");
 
-        Servo OutputLift = hardwareMap.servo.get("outputlift");
-        Servo OutputRotation = hardwareMap.servo.get("outputrotate");
 
-        CRServo Intake = hardwareMap.crservo.get("intake");
+        Servo LeftOutputLift = hardwareMap.servo.get("leftoutputlift");
+        Servo RightOutputLift = hardwareMap.servo.get("rightoutputlift");
+        Servo LeftOutputRotate = hardwareMap.servo.get("leftoutputlift");
+        Servo RightOutputRotate = hardwareMap.servo.get("rightoutputrotate");
+
+
+
 
         DcMotor elevator = hardwareMap.dcMotor.get("elevator");
         DcMotor armextender = hardwareMap.dcMotor.get("armextender");
@@ -43,9 +43,8 @@ public class MecanumTeleOp extends LinearOpMode {
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         elevator.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        IntakeLift.setPosition(0.55);
-        OutputRotation.setPosition(0.9706);
-        OutputLift.setPosition(OUTPUT_LIFT_DOWN);
+
+
 
         waitForStart();
 
@@ -65,6 +64,8 @@ public class MecanumTeleOp extends LinearOpMode {
             //intake
             double intakepower = 0.25 * (gamepad2.right_trigger - gamepad2.left_trigger);
 
+
+
             // Denominator is the largest motor power (absolute value) or 1
             // This ensures all the powers maintain the same ratio,
             // but only if at least one is out of the range [-1, 1]
@@ -79,32 +80,13 @@ public class MecanumTeleOp extends LinearOpMode {
             frontRightMotor.setPower(frontRightPower);
             backRightMotor.setPower(backRightPower);
 
-            Intake.setPower(intakepower);
+            LeftOutputRotate.setPosition(OUTPUT_LIFT_POSITION);
+            RightOutputRotate.setPosition(OUTPUT_LIFT_POSITION + 0.171);
+           
 
             elevator.setPower(ry);
             armextender.setPower(dx);
 
-            //setting position to dump the intake
-             if (gamepad2.a) {
-
-                IntakeLift.setPosition(0.9);
-                //setting the passive positon for the intake thing - so that it doesn't drag
-            } else if (gamepad2.b) {
-                IntakeLift.setPosition(0.55);
-            }
-            //this is going up
-            if (gamepad2.x) {
-                OutputRotation.setPosition(0.9706);
-
-                telemetry.addData("Arm Down", 0);
-            }
-            if(gamepad2.y)
-            {
-               OutputLift.setPosition(OUTPUT_LIFT_DOWN);
-
-
-
-            }
 
             if(gamepad1.a)
             {
@@ -118,29 +100,6 @@ public class MecanumTeleOp extends LinearOpMode {
             //for dumping
 
 
-            if (gamepad2.dpad_up)
-            {
-                OutputLift.setPosition(OUTPUT_LIFT_CLIP_PICKUP);
-                OutputRotation.setPosition(0);
-
-
-            }
-            if (gamepad2.dpad_down)
-            {
-                OutputLift.setPosition(OUTPUT_LIFT_BUCKET);
-                OutputRotation.setPosition(0.4336);
-
-            }
-            if(gamepad2.dpad_left)
-            {
-                OutputRotation.setPosition(0.112);
-            }
-            if(gamepad2.dpad_right)
-            {
-                OutputLift.setPosition(OUTPUT_LIFT_CLIP_SCORE);
-
-
-            }
 
         }
 
@@ -164,4 +123,3 @@ public class MecanumTeleOp extends LinearOpMode {
             }
 
         }
-
