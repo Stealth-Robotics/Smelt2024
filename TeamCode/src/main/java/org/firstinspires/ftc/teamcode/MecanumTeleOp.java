@@ -18,6 +18,8 @@ public class MecanumTeleOp extends LinearOpMode {
         float armSetting = 0;
         double speedModifier = 1;
         float bucketmodifier = 1f;
+        boolean elevatorlock = false;
+        float ry = 0;
 
        float OUTPUT_LIFT_ROTATION = 0;
 
@@ -30,7 +32,7 @@ public class MecanumTeleOp extends LinearOpMode {
 
         Servo LeftOutputLift = hardwareMap.servo.get("leftoutputlift");
         Servo RightOutputLift = hardwareMap.servo.get("rightoutputlift");
-        Servo LeftOutputRotate = hardwareMap.servo.get("leftoutputlift");
+        Servo LeftOutputRotate = hardwareMap.servo.get("leftoutputrotate");
         Servo RightOutputRotate = hardwareMap.servo.get("rightoutputrotate");
         Servo RightIntakeLift = hardwareMap.servo.get("rightintakelift");
         Servo LeftIntakeLift = hardwareMap.servo.get("leftintakelift");
@@ -99,8 +101,8 @@ public class MecanumTeleOp extends LinearOpMode {
                 double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
                 double zx = gamepad1.right_trigger - gamepad1.left_trigger;
                 double rzx = gamepad2.right_trigger - gamepad2.left_trigger;
-                //elevator
-                float ry = gamepad2.right_stick_y;
+                    ry = gamepad2.right_stick_y;
+
 
                 leftelle.setPower(ry);
                 rightelle.setPower(ry);
@@ -113,6 +115,7 @@ public class MecanumTeleOp extends LinearOpMode {
                 rightarm.setDirection(DcMotorSimple.Direction.REVERSE);
                 //intak
                 //
+                
 
                 if(gamepad2.right_bumper)
                 {
@@ -135,11 +138,17 @@ public class MecanumTeleOp extends LinearOpMode {
                 double frontRightPower = ((y - x - zx) / denominator) * speedModifier;
                 double backRightPower = ((y + x - zx) / denominator) * speedModifier;
 
+
+
                 frontLeftMotor.setPower(frontLeftPower);
                 backLeftMotor.setPower(backLeftPower);
                 frontRightMotor.setPower(frontRightPower);
                 backRightMotor.setPower(backRightPower);
                 intake.setPower(rzx * bucketmodifier);
+
+                LeftIntakeLift.setPosition(1);
+
+
 
 
 
@@ -147,60 +156,64 @@ public class MecanumTeleOp extends LinearOpMode {
            // armextender.setPower(dx);
 
 
-            if(gamepad1.a)
+            if(gamepad1.a&&speedModifier == 1)
             {
                 speedModifier = 0.5;
             }
-            else if (!gamepad1.a)
+            else if (gamepad1.a&&speedModifier == 0.5)
             {
                 speedModifier = 1;
             }
-
-
+            //dumping
+            if(gamepad2.a)
+            {
+                LeftOutputLift.setPosition(0.6817);
+                //RightOutputLift.setPosition(0.5032);
+                //LeftOutputRotate.setPosition(0.2153);
+            }
+            //clips
             if(gamepad2.dpad_up)
             {
-                RightOutputLift.setPosition(0.65);
-                RightOutputRotate.setPosition(1);
+                LeftOutputLift.setPosition(0.5733);
             }
+            //start position
             if(gamepad2.dpad_down)
             {
-                RightOutputLift.setPosition(0.3219);
-                RightOutputRotate.setPosition(0.6678);
+                LeftOutputLift.setPosition(0.1456);
+                //RightOutputLift.setPosition(0.0343);
+                //LeftOutputRotate.setPosition(0.7158);
             }
             if(gamepad2.dpad_left)
             {
-                RightOutputRotate.setPosition(0.9);
+                LeftOutputRotate.setPosition(0.4773);
             }
-
-            if(gamepad2.x)
+            if(gamepad2.right_bumper)
             {
-                RightOutputLift.setPosition(0.7961);
-                RightOutputRotate.setPosition(0.1107);
+                LeftOutputLift.setPosition(0.9194);
+                //RightOutputLift.setPosition(0.5032);
+                //LeftOutputRotate.setPosition(0.8);
             }
-            if(gamepad2.y)
+
+            if(intaketoggle == true)
             {
-                RightOutputLift.setPosition(0.5215);
-                RightOutputRotate.setPosition(0.2);
+                RightIntakeLift.setPosition(0.3025);
+            } else if(intaketoggle == false)
+            {
+                RightIntakeLift.setPosition(0.73);
             }
 
 
-            if(gamepad2.a && intaketoggle == false)
+
+            if(gamepad2.b && intaketoggle == false)
             {
                intaketoggle = true;
-            } else if (gamepad2.a && intaketoggle == true)
+            } else if (gamepad2.b && intaketoggle == true)
             {
                 intaketoggle = false;
             }
 
 
-            if(intaketoggle == true)
-            {
-                RightIntakeLift.setPosition(0);
-            }
-            if(intaketoggle == false)
-            {
-                RightIntakeLift.setPosition(0.3457);
-            }
+
 
 
 
@@ -237,3 +250,5 @@ public class MecanumTeleOp extends LinearOpMode {
 
         }
 }
+
+
