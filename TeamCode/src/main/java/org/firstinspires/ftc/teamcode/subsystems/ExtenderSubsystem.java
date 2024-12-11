@@ -40,7 +40,6 @@ public class ExtenderSubsystem extends StealthSubsystem {
     // PIDF to control arm movement keeps the arm from overshooting etc.
     private final PIDFController pidf = new PIDFController(kP, kI, kD, kF);
 
-
     public ExtenderSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
 
         this.telemetryA = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -53,7 +52,7 @@ public class ExtenderSubsystem extends StealthSubsystem {
     }
 
     /**
-     * Called automatically when the subsystem is registered.
+     * Called by the scheduler periodically if the subsystem is registered.
      */
     @Override
     public void periodic() {
@@ -67,10 +66,7 @@ public class ExtenderSubsystem extends StealthSubsystem {
             }
         }
 
-//        telemetryA.addData("Extend Target:", extendMotor.getTargetPosition());
-//        telemetryA.addData("Extend Mode:", extendMotor.getMode());
         telemetryA.addData("Extend Position:", extendMotor.getCurrentPosition());
-//        telemetryA.addData("Extender Power:", extendMotor.getPower());
         telemetryA.addData("Extender IsBusy:", extendMotor.isBusy());
         telemetryA.addData("Extender RunTo:", motorRunTo);
     }
@@ -94,27 +90,43 @@ public class ExtenderSubsystem extends StealthSubsystem {
     }
 
     /**
-     * Blocking function to set the position of the extend motor in % of max range
-     * Should only be used if this object isn't registered (periodic isn't running)
-     * @param position 0 to 1 in % of max range
+     * Starts the motor moving but does not wait for it to reach the desired position
+     * @param position % of the arm range
+     * @return A Command that can be run
      */
-    public void doPosition(double position) {
-        pidf.setSetPoint(position * MAX_HEIGHT);
-        motorRunTo = true;
-        while (motorRunTo) {
-            double power = pidf.calculate(extendMotor.getCurrentPosition());
-            extendMotor.setPower(power * maxSpeed);
-
-            if (pidf.atSetPoint()) {
-                extendMotor.setPower(-.1);
-                motorRunTo = false;
-            }
-        }
+    public Command startSetPositionCommand(double position) {
+        return this.runOnce(()-> setPosition(position));
     }
 
+    /**
+     * After calling setPosition this can be called to wait for the position to be reached
+     * @param timeout waiting time before giving up on the desired position
+     * @return command to wait for the position to be reached
+     */
+    public Command endSetPositionCommand(long timeout) {
+        long endTime = System.currentTimeMillis() + timeout;
+        return new WaitUntilCommand(()-> !motorRunTo || System.currentTimeMillis() >= endTime);
+    }
+
+    /**
+     * Sets the position of the extend motor in encoder ticks
+     * @param position position in encoder ticks
+     */
     public Command setPositionCommand(double position) {
         return this.runOnce(()-> setPosition(position))
                 .andThen(new WaitUntilCommand(()-> !motorRunTo));
+    }
+
+    /**
+     * Sets the position of the extend motor in encoder ticks with a timeout
+     * @param position % of the arm range
+     * @param timeout number of ms to wait for the position to be reached
+     * @return command to wait for the position to be reached
+     */
+    public Command setPositionCommand(double position, long timeout) {
+        long endTime = System.currentTimeMillis() + timeout;
+        return this.runOnce(()-> setPosition(position))
+                .andThen(new WaitUntilCommand(()-> !motorRunTo || System.currentTimeMillis() >= endTime));
     }
 
     /**
@@ -147,6 +159,4 @@ public class ExtenderSubsystem extends StealthSubsystem {
     public DcMotorEx getMotor1() {
         return extendMotor;
     }
-
-
 }

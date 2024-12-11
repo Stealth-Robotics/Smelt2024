@@ -30,17 +30,17 @@ public class FollowerConstants {
 
     // This section is for setting the actual drive vector for the front left wheel, if the robot
     // is facing a heading of 0 radians with the wheel centered at (0,0)
-    private static final double xMovement = 66.972; // 63.8141; MID //66.972 FULL// 60 DIST
-    private static final double yMovement = 55.5728; // MID 51.4299; // 55.5728; FULL //60 dst
+    private static final double xMovement = 63.8141; // 63.8141; MID //66.972 FULL// 60 DIST
+    private static final double yMovement = 51.4299; // MID 51.4299; // 55.5728; FULL //60 dst
     private static double[] convertToPolar = Point.cartesianToPolar(xMovement, -yMovement);
     public static Vector frontLeftVector = MathFunctions.normalizeVector(new Vector(convertToPolar[0], convertToPolar[1]));
 
 
     // Translational PIDF coefficients (don't use integral)
     public static CustomPIDFCoefficients translationalPIDFCoefficients = new CustomPIDFCoefficients(
-            0.1,
+           0.09, //.1
             0,
-            0.013,
+            0.03, //0.013
             0);
 
     // Translational Integral
@@ -91,7 +91,8 @@ public class FollowerConstants {
 
     // Acceleration of the drivetrain when power is cut in inches/second^2 (should be negative)
     // if not negative, then the robot thinks that its going to go faster under 0 power
-    public static double forwardZeroPowerAcceleration = -24; // -38.7776 LOW // -51.637 FULL;
+    // The smaller (negative) the number the further the robot will travel under 0 power
+    public static double forwardZeroPowerAcceleration = -15; // -38.7776 LOW // -51.637 FULL;
 
     // Acceleration of the drivetrain when power is cut in inches/second^2 (should be negative)
     // if not negative, then the robot thinks that its going to go faster under 0 power
@@ -136,10 +137,10 @@ public class FollowerConstants {
     public static int APPROXIMATION_STEPS = 1000;
 
     // This is scales the translational error correction power when the Follower is holding a Point.
-    public static double holdPointTranslationalScaling = 0.45;
+    public static double holdPointTranslationalScaling = .6; //0.45;
 
     // This is scales the heading error correction power when the Follower is holding a Point.
-    public static double holdPointHeadingScaling = 0.35;
+    public static double holdPointHeadingScaling = .5; //0.35;
 
     // This is the number of times the velocity is recorded for averaging when approximating a first
     // and second derivative for on the fly centripetal correction. The velocity is calculated using
@@ -208,4 +209,8 @@ public class FollowerConstants {
 
     // Feed forward constant added on to the secondary drive PIDF
     public static double secondaryDrivePIDFFeedForward = 0.01;
+
+    // Follower uses 0 - 144 inches field size starting at blue observation zone
+    public static double FIELD_SIZE_X_INCHES = 144;
+    public static double FIELD_SIZE_Y_INCHES = 144;
 }
