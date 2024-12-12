@@ -6,6 +6,9 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.controller.PIDFController;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.arcrobotics.ftclib.hardware.motors.MotorEx;
+import com.arcrobotics.ftclib.hardware.motors.MotorGroup;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -18,8 +21,10 @@ import org.stealthrobotics.library.StealthSubsystem;
  */
 @Config
 public class LifterSubsystem extends StealthSubsystem {
-    private final DcMotorEx liftMotor;
-    private static final String MOTOR_NAME_1 = "elevator";
+    private final MotorEx LeftElevator;
+    private final MotorEx RightElevator;
+    private static final String Left_Elevator = "leftelle";
+    private static final String Right_Elevator = "rightelle";
     private final Telemetry telemetryA;
 
     public static double kP = 0.006;
@@ -35,17 +40,21 @@ public class LifterSubsystem extends StealthSubsystem {
     private static final double MAX_HEIGHT = 4367;
 
     private final PIDFController pidf = new PIDFController(kP, kI, kD, kF);
+    private final MotorGroup motors;
 
 
     public LifterSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
 
         this.telemetryA = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        liftMotor = hardwareMap.get(DcMotorEx.class, MOTOR_NAME_1);
+        LeftElevator = new MotorEx(hardwareMap, Left_Elevator);
+        RightElevator = new MotorEx(hardwareMap, Right_Elevator);
         pidf.setTolerance(TOLERANCE);
         // Use MotorGroup for multiple motors
+        RightElevator.setInverted(true);
+        RightElevator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        LeftElevator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        motors = new MotorGroup(LeftElevator, RightElevator);
         resetEncoder();
-        liftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        liftMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
     }
 
     /**
@@ -54,17 +63,16 @@ public class LifterSubsystem extends StealthSubsystem {
     @Override
     public void periodic() {
         if (motorRunTo) {
-            double power = pidf.calculate(liftMotor.getCurrentPosition());
-            liftMotor.setPower(-power * maxSpeed);
+            double power = pidf.calculate(getPosition());
+            motors.set(-power * maxSpeed);
 
             if (pidf.atSetPoint()) {
-                liftMotor.setPower(-.1);
+                motors.set(-.1);
                 motorRunTo = false;
             }
         }
 
-        telemetryA.addData("Lift Target:", liftMotor.getTargetPosition());
-        telemetryA.addData("Lift Position:", liftMotor.getCurrentPosition());
+        telemetryA.addData("Lift Position:", getPosition());
         telemetryA.addData("motorRunTo:", motorRunTo);
     }
 
@@ -92,7 +100,7 @@ public class LifterSubsystem extends StealthSubsystem {
      * @param power power to set
      */
     public void setPower(double power) {
-        liftMotor.setPower(power);
+        motors.set(power);
     }
 
     /**
@@ -113,11 +121,11 @@ public class LifterSubsystem extends StealthSubsystem {
         pidf.setSetPoint(position * MAX_HEIGHT);
         motorRunTo = true;
         while (motorRunTo) {
-            double power = pidf.calculate(liftMotor.getCurrentPosition());
-            liftMotor.setPower(-power * maxSpeed);
+            double power = pidf.calculate(getPosition());
+            motors.set(-power * maxSpeed);
 
             if (pidf.atSetPoint()) {
-                liftMotor.setPower(-.1);
+                motors.set(-.1);
                 motorRunTo = false;
             }
         }
@@ -136,15 +144,15 @@ public class LifterSubsystem extends StealthSubsystem {
      * @return current position
      */
     public int getPosition() {
-        return liftMotor.getCurrentPosition();
+        return this.RightElevator.getCurrentPosition();
     }
 
     /**
      * Resets the encoder of the lift motor to 0
      */
     public void resetEncoder() {
-        liftMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        liftMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        motors.resetEncoder();
+        motors.setRunMode(Motor.RunMode.RawPower);
     }
 
     /**
@@ -173,7 +181,7 @@ public class LifterSubsystem extends StealthSubsystem {
      * Returns the lift motor
      * @return raw DcMotorEx object
      */
-    public DcMotorEx getMotor1(){
-        return liftMotor;
+    public MotorGroup getMotors() {
+        return this.motors;
     }
 }

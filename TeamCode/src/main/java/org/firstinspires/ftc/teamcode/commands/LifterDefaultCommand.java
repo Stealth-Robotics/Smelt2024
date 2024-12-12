@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.commands;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.CommandBase;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -30,9 +31,7 @@ public class LifterDefaultCommand extends CommandBase {
         double power = axis.getAsDouble();
         if(power > axisDeadZone || power < -axisDeadZone) {
             lifter.stopRunTo();
-            if (!lifter.getMotor1().getMode().equals(DcMotor.RunMode.RUN_WITHOUT_ENCODER)) {
-                lifter.getMotor1().setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            }
+            lifter.getMotors().setRunMode(Motor.RunMode.RawPower);
 
             manualControl = true;
             lifter.setPower(power);

@@ -12,7 +12,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.localization.Pose;
 import org.firstinspires.ftc.teamcode.subsystems.ExtenderSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.FollowerSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LifterSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.LimeLightSubsystem;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
 // Example of using the Stealth library for TeleOp driving
@@ -28,8 +27,6 @@ public class TeleStealth extends StealthOpMode {
     //private GamepadEx operator;
 
     private FollowerSubsystem fss;
-    private LimeLightSubsystem ls;
-
 
     @Override
     public void whileWaitingToStart(){
@@ -46,10 +43,9 @@ public class TeleStealth extends StealthOpMode {
         // You need to created two classes for each mechanism.
         // The Subsystem sets up the hardware and the command runs the code on the hardware
         fss = new FollowerSubsystem(hardwareMap, telemetry);
-        ls = new LimeLightSubsystem(hardwareMap, telemetry);
         LifterSubsystem lifter = new LifterSubsystem(hardwareMap, telemetry);
         ExtenderSubsystem extender = new ExtenderSubsystem(hardwareMap, telemetry);
-        register(fss, ls, lifter, extender);
+        register(fss, lifter, extender);
 
         // this is setting for telemetry to be sent to the driver station
         fss.getFollower().setStartingPose(startPose);
@@ -86,9 +82,6 @@ public class TeleStealth extends StealthOpMode {
         driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new InstantCommand(()->lifter.setPosition(.99)));
         driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(new InstantCommand(()->lifter.setPosition(.001)));
         driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(new InstantCommand(()->extender.setPosition(.5)));
-
-        driver.getGamepadButton(GamepadKeys.Button.B).whenPressed(new InstantCommand(()->ls.togglePipeline()));
-
 
     }
 

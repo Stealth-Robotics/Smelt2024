@@ -6,6 +6,9 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.controller.PIDFController;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.arcrobotics.ftclib.hardware.motors.MotorEx;
+import com.arcrobotics.ftclib.hardware.motors.MotorGroup;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -18,7 +21,8 @@ import org.stealthrobotics.library.StealthSubsystem;
  */
 @Config
 public class ExtenderSubsystem extends StealthSubsystem {
-    private static final String MOTOR_NAME_1 = "armextender";
+    private static final String Left_Arm = "leftarm";
+    private static final String Right_Arm = "rightarm";
     private final Telemetry telemetryA;
 
     // Adjust these values for your arm. These will need to change
@@ -29,13 +33,16 @@ public class ExtenderSubsystem extends StealthSubsystem {
     public static double kF = 0.00;
 
     // This should be the maximum encoder extension of the arm(s)
-    private static final double MAX_HEIGHT = 417;
+    private static final double MAX_HEIGHT = 2180;
 
     // Acceptable position error to be considered at target location
     public static final double TOLERANCE = 10.0;
     private Boolean motorRunTo = false;
     private final double maxSpeed = 1;
-    private final DcMotorEx extendMotor;
+    private final MotorEx armright;
+    private final MotorEx armleft;
+    private final MotorGroup motors;
+
 
     // PIDF to control arm movement keeps the arm from overshooting etc.
     private final PIDFController pidf = new PIDFController(kP, kI, kD, kF);
@@ -43,31 +50,34 @@ public class ExtenderSubsystem extends StealthSubsystem {
     public ExtenderSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
 
         this.telemetryA = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        extendMotor = hardwareMap.get(DcMotorEx.class, MOTOR_NAME_1);
+        armright = new MotorEx(hardwareMap, Left_Arm);
+        armleft = new MotorEx(hardwareMap, Right_Arm);
         pidf.setTolerance(TOLERANCE);
-        // Use MotorGroup for multiple motors
-        resetEncoder();
-        extendMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        extendMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-    }
 
+        armright.setInverted(true);
+        armright.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        armleft.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        motors = new MotorGroup(armleft, armright);
+        resetEncoder();
+
+    }
+    
     /**
      * Called by the scheduler periodically if the subsystem is registered.
      */
     @Override
     public void periodic() {
         if (motorRunTo) {
-            double power = pidf.calculate(extendMotor.getCurrentPosition());
-            extendMotor.setPower(power * maxSpeed);
+            double power = pidf.calculate(getPosition());
+            motors.set(power * maxSpeed);
 
             if (pidf.atSetPoint()) {
-                extendMotor.setPower(0);
+                motors.set(0);
                 motorRunTo = false;
             }
         }
 
-        telemetryA.addData("Extend Position:", extendMotor.getCurrentPosition());
-        telemetryA.addData("Extender IsBusy:", extendMotor.isBusy());
+        telemetryA.addData("Extend Position:", getPosition());
         telemetryA.addData("Extender RunTo:", motorRunTo);
     }
 
@@ -76,7 +86,7 @@ public class ExtenderSubsystem extends StealthSubsystem {
      * @param power power to set
      */
     public void setPower(double power) {
-        extendMotor.setPower(power);
+        motors.set(power);
     }
 
     /**
@@ -141,22 +151,25 @@ public class ExtenderSubsystem extends StealthSubsystem {
      * @return current position
      */
     public int getPosition() {
-        return extendMotor.getCurrentPosition();
+        return armright.getCurrentPosition();
     }
 
     /**
      * Resets the encoder of the extend motor
      */
     public void resetEncoder() {
-        extendMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        extendMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        armright.resetEncoder();
+        armleft.resetEncoder();
+        motors.resetEncoder();
+        motors.setRunMode(Motor.RunMode.RawPower);
     }
 
     /**
      * Returns the extend motor
      * @return extend motor
      */
-    public DcMotorEx getMotor1() {
-        return extendMotor;
+    public MotorGroup getMotors()
+    {
+        return motors;
     }
 }

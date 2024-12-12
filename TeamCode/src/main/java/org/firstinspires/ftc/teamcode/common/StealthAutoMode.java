@@ -12,7 +12,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.tuning.FollowerConstants;
 import org.firstinspires.ftc.teamcode.subsystems.ExtenderSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.FollowerSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LifterSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.LimeLightSubsystem;
 import org.firstinspires.ftc.teamcode.utils.MovementUtil;
 import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
@@ -33,7 +32,6 @@ public abstract class StealthAutoMode extends StealthOpMode {
 
     // Subsystems for robot control
     protected FollowerSubsystem followerSubsystem; // For path following
-    protected LimeLightSubsystem limelightSubsystem; // For vision tracking
     protected LifterSubsystem lss; // For controlling the lifter
     protected ExtenderSubsystem ess; // For controlling the extender
 
@@ -59,11 +57,10 @@ public abstract class StealthAutoMode extends StealthOpMode {
     public void initialize() {
         telemetryA = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         followerSubsystem = new FollowerSubsystem(hardwareMap, telemetry);
-        limelightSubsystem = new LimeLightSubsystem(hardwareMap, telemetry);
         lss = new LifterSubsystem(hardwareMap, telemetry);
         ess = new ExtenderSubsystem(hardwareMap, telemetry);
         // registers the subsystems for running the periodic override when the match starts
-        register(followerSubsystem, limelightSubsystem, lss, ess);
+        register(followerSubsystem, lss, ess);
     }
 
     /**
@@ -75,35 +72,6 @@ public abstract class StealthAutoMode extends StealthOpMode {
     @Override
     public void whileWaitingToStart() {
         telemetryA.addData("Alliance", Alliance.get().toString());
-        LLResult result = limelightSubsystem.getLastResult();
-        if (result != null && result.isValid()) {
-            Pose3D pose3d = result.getBotpose();
-            Pose fixedPose = MovementUtil.getFollowPoseFromLimelight(pose3d);
-            this.lastPose = fixedPose;
-            telemetryA.addData("CAM X", fixedPose.getX());
-            telemetryA.addData("CAM Y", fixedPose.getY());
-            telemetryA.addData("CAM Heading", Math.toDegrees(fixedPose.getHeading()));
-        }
-
-        // Get average of position over time
-        if (System.currentTimeMillis() > timer + AVERAGE_WAIT_TIME) {
-            timer = System.currentTimeMillis();
-            Pose3D avgPose3d = limelightSubsystem.getAveragePose3D();
-            if (avgPose3d != null) {
-                this.avgPose = MovementUtil.getFollowPoseFromLimelight(avgPose3d);
-            }
-        }
-
-        if (this.avgPose != null) {
-            telemetryA.addData("CAM AVG X", avgPose.getX());
-            telemetryA.addData("CAM AVG Y", avgPose.getY());
-            telemetryA.addData("CAM Heading AVG", Math.toDegrees(avgPose.getHeading()));
-            if (avgPose.getX() < (FollowerConstants.FIELD_SIZE_X_INCHES / 2)) {
-                Alliance.set(Alliance.BLUE);
-            } else {
-                Alliance.set(Alliance.RED);
-            }
-        }
     }
 
     /**
@@ -130,11 +98,5 @@ public abstract class StealthAutoMode extends StealthOpMode {
         return followerSubsystem;
     }
 
-    /**
-     * Gets the LimeLightSubsystem instance.
-     * @return LimeLightSubsystem instance
-     */
-    public LimeLightSubsystem getLimelight() {
-        return limelightSubsystem;
-    }
+
 }

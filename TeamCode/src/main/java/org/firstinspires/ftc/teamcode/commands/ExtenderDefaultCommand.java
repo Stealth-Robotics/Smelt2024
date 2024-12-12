@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.commands;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.CommandBase;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -36,10 +37,7 @@ public class ExtenderDefaultCommand extends CommandBase {
 
         if(power > axisDeadZone || power < -axisDeadZone) {
             extender.stopRunTo();
-            if (!extender.getMotor1().getMode().equals(DcMotor.RunMode.RUN_WITHOUT_ENCODER)) {
-                extender.getMotor1().setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            }
-
+            extender.getMotors().setRunMode(Motor.RunMode.RawPower);
             manualControl = true;
             extender.setPower(power); //Manual control
             telemetryA.addData("Manual Extend", power);
