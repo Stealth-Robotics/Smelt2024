@@ -4,13 +4,16 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.commands.ExtenderDefaultCommand;
 import org.firstinspires.ftc.teamcode.commands.FollowerCommand;
+import org.firstinspires.ftc.teamcode.commands.IntakeSuckCommand;
 import org.firstinspires.ftc.teamcode.commands.LifterDefaultCommand;
 import org.firstinspires.ftc.teamcode.pedroPathing.localization.Pose;
 import org.firstinspires.ftc.teamcode.subsystems.ExtenderSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.FollowerSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LifterSubsystem;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
@@ -45,7 +48,9 @@ public class TeleStealth extends StealthOpMode {
         fss = new FollowerSubsystem(hardwareMap, telemetry);
         LifterSubsystem lifter = new LifterSubsystem(hardwareMap, telemetry);
         ExtenderSubsystem extender = new ExtenderSubsystem(hardwareMap, telemetry);
-        register(fss, lifter, extender);
+        IntakeSubsystem intake = new IntakeSubsystem(hardwareMap, telemetry);
+        register(fss, lifter, extender, intake);
+        IntakeSuckCommand intakecmd = new IntakeSuckCommand(intake, telemetry);
 
         // this is setting for telemetry to be sent to the driver station
         fss.getFollower().setStartingPose(startPose);
@@ -61,6 +66,8 @@ public class TeleStealth extends StealthOpMode {
         driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(new InstantCommand(cmd::toggleSlowMode));
         driver.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(cmd::toggleRobotCentric));
         driver.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new InstantCommand(cmd::resetImu));
+
+        driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new InstantCommand((intakecmd::toggleState)));
 
         LifterDefaultCommand liftCmd = new LifterDefaultCommand(
                 lifter,
