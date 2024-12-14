@@ -6,15 +6,19 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import org.firstinspires.ftc.teamcode.commands.ClipsCommand;
 import org.firstinspires.ftc.teamcode.commands.ExtenderDefaultCommand;
 import org.firstinspires.ftc.teamcode.commands.FollowerCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeSuckCommand;
 import org.firstinspires.ftc.teamcode.commands.LifterDefaultCommand;
+import org.firstinspires.ftc.teamcode.commands.OutputLiftCommand;
 import org.firstinspires.ftc.teamcode.pedroPathing.localization.Pose;
+import org.firstinspires.ftc.teamcode.subsystems.ClipsSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ExtenderSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.FollowerSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LifterSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.OutputSubsystem;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
 // Example of using the Stealth library for TeleOp driving
@@ -27,6 +31,7 @@ public class TeleStealth extends StealthOpMode {
     private static final Pose startPose = new Pose(8.5, 48, 0);
 
     private GamepadEx driver;
+    private GamepadEx operator;
     //private GamepadEx operator;
 
     private FollowerSubsystem fss;
@@ -41,6 +46,7 @@ public class TeleStealth extends StealthOpMode {
     @Override
     public void initialize(){
         driver = new GamepadEx(gamepad1);
+        operator = new GamepadEx(gamepad2);
         //operator = new GamepadEx(gamepad2);
 
         // You need to created two classes for each mechanism.
@@ -49,9 +55,12 @@ public class TeleStealth extends StealthOpMode {
         LifterSubsystem lifter = new LifterSubsystem(hardwareMap, telemetry);
         ExtenderSubsystem extender = new ExtenderSubsystem(hardwareMap, telemetry);
         IntakeSubsystem intake = new IntakeSubsystem(hardwareMap, telemetry);
+       ClipsSubsystem clips = new ClipsSubsystem(hardwareMap, telemetry);
+        OutputSubsystem output = new OutputSubsystem(hardwareMap,telemetry);
         register(fss, lifter, extender, intake);
         IntakeSuckCommand intakecmd = new IntakeSuckCommand(intake, telemetry);
-
+        ClipsCommand clipscmd = new ClipsCommand(clips, telemetry);
+        OutputLiftCommand outputLiftcmd = new OutputLiftCommand(output, telemetry);
         // this is setting for telemetry to be sent to the driver station
         fss.getFollower().setStartingPose(startPose);
         // registers for the periodic to be called (telemetry)
@@ -67,8 +76,15 @@ public class TeleStealth extends StealthOpMode {
         driver.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(cmd::toggleRobotCentric));
         driver.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new InstantCommand(cmd::resetImu));
 
-        driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new InstantCommand((intakecmd::toggleState)));
+        operator.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new InstantCommand((intakecmd::toggleState)));
+        operator.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new InstantCommand((intakecmd::toggleStatebackwards)));
 
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(new InstantCommand((clipscmd::toggleOpen)));
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(new InstantCommand((clipscmd::toggleClose)));
+
+        operator.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(outputLiftcmd::testPositionUp));
+        operator.getGamepadButton(GamepadKeys.Button.Y).whenPressed( new InstantCommand(outputLiftcmd::testPositionDown));
+        operator.getGamepadButton(GamepadKeys.Button.X).whenPressed(new InstantCommand(outputLiftcmd::setClip));
         LifterDefaultCommand liftCmd = new LifterDefaultCommand(
                 lifter,
                 telemetry,

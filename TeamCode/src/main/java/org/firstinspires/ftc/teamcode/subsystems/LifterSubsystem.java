@@ -67,7 +67,7 @@ public class LifterSubsystem extends StealthSubsystem {
             motors.set(-power * maxSpeed);
 
             if (pidf.atSetPoint()) {
-                motors.set(-.1);
+                motors.set(.1);
                 motorRunTo = false;
             }
         }

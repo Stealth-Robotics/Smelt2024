@@ -23,11 +23,11 @@ public class IntakeSuckCommand extends CommandBase {
 
     }
     public void setIntake(){
-        intake.setPower(-1);
+        intake.setPower(1);
     }
 
     public void setOuttake(){
-        intake.setPower(1);
+        intake.setPower(-1);
     }
 
     public void setStopIntake() {
@@ -43,6 +43,22 @@ public class IntakeSuckCommand extends CommandBase {
                 break;
             case INTAKING:
                 state = IntakeState.OUTTAKING;
+                setOuttake();
+                break;
+            default:
+                state = IntakeState.STOPPED;
+                setStopIntake();
+        }
+    }
+    public void toggleStatebackwards()
+    {
+        switch (state) {
+            case STOPPED:
+                state = IntakeState.OUTTAKING;
+                setIntake();
+                break;
+            case OUTTAKING:
+                state = IntakeState.INTAKING;
                 setOuttake();
                 break;
             default:
