@@ -29,7 +29,7 @@ public class FollowerCommand extends CommandBase {
 
 
     // setting to false means field centric
-    private boolean toggleRobotCentric = false;
+    private boolean toggleRobotCentric = true;
 
     private static final double maxPower = 1.0;
     private static final double slowPower = .5;

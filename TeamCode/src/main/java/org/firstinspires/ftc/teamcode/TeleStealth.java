@@ -68,9 +68,9 @@ public class TeleStealth extends StealthOpMode {
         FollowerCommand cmd = new FollowerCommand(
                 fss,
                 telemetry,
-                () -> driver.getLeftY(),
-                () -> -driver.getLeftX(),
-                () -> -driver.getRightX());
+                () -> -driver.getLeftY(),
+                () -> driver.getLeftX(),
+                () -> (driver.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) - driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
         fss.setDefaultCommand(cmd);
         driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(new InstantCommand(cmd::toggleSlowMode));
         driver.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(cmd::toggleRobotCentric));
@@ -94,8 +94,7 @@ public class TeleStealth extends StealthOpMode {
         ExtenderDefaultCommand extenderCmd = new ExtenderDefaultCommand(
                 extender,
                 telemetry,
-                ()-> driver.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER),
-                ()-> driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER));
+                ()-> driver.getRightX());
 
         extender.setDefaultCommand(extenderCmd);
 

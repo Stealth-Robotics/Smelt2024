@@ -15,25 +15,22 @@ public class ExtenderDefaultCommand extends CommandBase {
 
     private final ExtenderSubsystem extender;
     private final MultipleTelemetry telemetryA;
-    private final DoubleSupplier leftTrigger;
-    private final DoubleSupplier rightTrigger;
+    private final DoubleSupplier extendAxis;
     private boolean manualControl = false;
     private static final double axisDeadZone = 0.05;
 
 
-    public ExtenderDefaultCommand(ExtenderSubsystem extender, Telemetry telemetry, DoubleSupplier leftTrigger, DoubleSupplier rightTrigger) {
+    public ExtenderDefaultCommand(ExtenderSubsystem extender, Telemetry telemetry, DoubleSupplier extendAxis) {
         addRequirements(extender);
         this.extender = extender;
         this.telemetryA = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        this.leftTrigger = leftTrigger;
-        this.rightTrigger = rightTrigger;
+        this.extendAxis = extendAxis;
     }
 
     @Override
     public void execute() {
-        double leftPower = leftTrigger.getAsDouble();
-        double rightPower = rightTrigger.getAsDouble();
-        double power = rightPower - leftPower;
+
+        double power = extendAxis.getAsDouble();
 
         if(power > axisDeadZone || power < -axisDeadZone) {
             extender.stopRunTo();
