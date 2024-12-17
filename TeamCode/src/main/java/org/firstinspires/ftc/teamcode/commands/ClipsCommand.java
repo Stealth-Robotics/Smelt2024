@@ -22,6 +22,7 @@ public class ClipsCommand extends CommandBase {
     public void execute(){
 
     }
+
     public void setOpen(){clips.setPower(0.6);}
     public void setClose(){clips.setPower(0);}
 

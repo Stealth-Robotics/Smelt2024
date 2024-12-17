@@ -3,9 +3,7 @@ package org.firstinspires.ftc.teamcode.commands;
 import com.arcrobotics.ftclib.command.CommandBase;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.subsystems.ClipsSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.OutputSubsystem;
-
 
 public class OutputLiftCommand extends CommandBase {
     //Servo value for original pos - 0.9289
@@ -17,36 +15,25 @@ public class OutputLiftCommand extends CommandBase {
         DOWN,
         BUCKET
     }
-    private final OutputSubsystem outputlift;
+    private final OutputSubsystem outputLift;
     public OutputState state = OutputState.CLIP;
 
     public OutputLiftCommand(OutputSubsystem outputSubsystem, Telemetry telemetry) {
-        this.outputlift = outputSubsystem;
-        addRequirements(outputlift);
+        this.outputLift = outputSubsystem;
+        addRequirements(outputLift);
     }
 
     @Override
     public void execute() {
 
     }
-    public void setClip(){outputlift.setPosition(0.5);}
+    public void setClip(){outputLift.setPosition(0.6661);}
+    public void setDown(){outputLift.setPosition(0.9289);}
+    public void setDump(){outputLift.setPosition(0.7389);}
+    public void setMax(){outputLift.setPosition(0.25);}
 
     public void setPose(double pose) {
-        outputlift.setPosition(pose);
+        outputLift.setPosition(pose);
     }
 
-    public void testPositionUp() {
-        double curPose = .5;
-        for(double i = curPose; i < 1; i += .005)
-        {
-            outputlift.setPosition(i);
-        }
-    }
-    public void testPositionDown() {
-        double curPose = .5;
-        for(double i = curPose; i < 1; i -= .005)
-        {
-            outputlift.setPosition(i);
-        }
-    }
 }

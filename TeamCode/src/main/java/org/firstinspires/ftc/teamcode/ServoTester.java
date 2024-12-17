@@ -18,7 +18,7 @@ public class ServoTester extends LinearOpMode {
         boolean elevatorlock = false;
         //Servo IntakeLift = hardwareMap.servo.get("intakelift");
 
-        Servo OutputLiftLeft = hardwareMap.servo.get("leftbucketlift");
+        Servo servotest = hardwareMap.servo.get("leftbucketrotate");
         //Servo OutputLiftRight = hardwareMap.servo.get("outputliftright");
         //Servo OutputRotationRight = hardwareMap.servo.get("outputrotateright");
 
@@ -60,17 +60,17 @@ public class ServoTester extends LinearOpMode {
            {
                armSetting += 0.0004;
 
-                OutputLiftLeft.setPosition(armSetting);
+                servotest.setPosition(armSetting);
 //                OutputRotation.setPosition(armSetting);
             }
 
             if(gamepad2.left_bumper)
             {
                 armSetting -= 0.0004;
-                OutputLiftLeft.setPosition(armSetting);
+                servotest.setPosition(armSetting);
 //                OutputRotation.setPosition(armSetting);
             }
-            telemetry.addData("servo value",OutputLiftLeft.getPosition());
+            telemetry.addData("servo value",servotest.getPosition());
                 telemetry.update();
             }
 
