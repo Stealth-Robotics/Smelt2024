@@ -64,12 +64,15 @@ public class LifterSubsystem extends StealthSubsystem {
     public void periodic() {
         if (motorRunTo) {
             double power = pidf.calculate(getPosition());
-            motors.set(-power * maxSpeed);
+            motors.set(power * -maxSpeed);
 
             if (pidf.atSetPoint()) {
                 motors.set(.1);
                 motorRunTo = false;
             }
+        }
+        else {
+            motors.set(.1);
         }
 
         telemetryA.addData("Lift Position:", getPosition());

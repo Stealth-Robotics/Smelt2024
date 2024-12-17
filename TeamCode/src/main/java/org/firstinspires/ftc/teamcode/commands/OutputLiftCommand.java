@@ -25,8 +25,9 @@ public class OutputLiftCommand extends CommandBase {
 
     @Override
     public void execute() {
-
+        // Empty for now
     }
+
     public void setClip(){outputLift.setPosition(0.6661);}
     public void setDown(){outputLift.setPosition(0.9289);}
     public void setDump(){outputLift.setPosition(0.7389);}
