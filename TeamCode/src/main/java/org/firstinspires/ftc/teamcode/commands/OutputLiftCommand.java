@@ -15,6 +15,7 @@ public class OutputLiftCommand extends CommandBase {
         DOWN,
         BUCKET
     }
+
     private final OutputSubsystem outputLift;
     public OutputState state = OutputState.CLIP;
 

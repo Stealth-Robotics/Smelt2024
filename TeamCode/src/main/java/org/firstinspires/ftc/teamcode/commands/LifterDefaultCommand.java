@@ -38,7 +38,7 @@ public class LifterDefaultCommand extends CommandBase {
 
         }else if (manualControl) {
             // holds the lift here
-            lifter.setPower(-0.1);
+            lifter.setPower(LifterSubsystem.HOLD_POWER);
             manualControl = false;
         }
     }

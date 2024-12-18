@@ -27,20 +27,20 @@ public class ExtenderSubsystem extends StealthSubsystem {
 
     // Adjust these values for your arm. These will need to change
     // based on arm weight and total range of the arm
-    public static double kP = 0.007;
-    public static double kI = 0.00;
-    public static double kD = 0.0;
-    public static double kF = 0.00;
+    private static final double kP = 0.007;
+    private static final double kI = 0.00;
+    private static final double kD = 0.0;
+    private static final double kF = 0.00;
 
     // This should be the maximum encoder extension of the arm(s)
-    private static final double MAX_HEIGHT = 2180;
+    private static final double maxHeight = 2180;
 
     // Acceptable position error to be considered at target location
-    public static final double TOLERANCE = 10.0;
-    private Boolean motorRunTo = false;
-    private final double maxSpeed = 1;
-    private final MotorEx armright;
-    private final MotorEx armleft;
+    private static final double tolerance = 10.0;
+    private Boolean usePidf = false;
+    private static final double maxSpeed = 1;
+    private final MotorEx armRight;
+    private final MotorEx armLeft;
     private final MotorGroup motors;
 
 
@@ -50,14 +50,15 @@ public class ExtenderSubsystem extends StealthSubsystem {
     public ExtenderSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
 
         this.telemetryA = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        armright = new MotorEx(hardwareMap, Left_Arm);
-        armleft = new MotorEx(hardwareMap, Right_Arm);
-        pidf.setTolerance(TOLERANCE);
+        armRight = new MotorEx(hardwareMap, Left_Arm);
+        armLeft = new MotorEx(hardwareMap, Right_Arm);
+        motors = new MotorGroup(armLeft, armRight);
+        pidf.setTolerance(tolerance);
 
-        armright.setInverted(true);
-        armright.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        armleft.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        motors = new MotorGroup(armleft, armright);
+        armRight.setInverted(true);
+        motors.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        motors.setRunMode(Motor.RunMode.RawPower);
+
         resetEncoder();
 
     }
@@ -67,18 +68,18 @@ public class ExtenderSubsystem extends StealthSubsystem {
      */
     @Override
     public void periodic() {
-        if (motorRunTo) {
+        if (usePidf) {
             double power = pidf.calculate(getPosition());
             motors.set(power * maxSpeed);
 
             if (pidf.atSetPoint()) {
                 motors.set(0);
-                motorRunTo = false;
+                usePidf = false;
             }
         }
 
         telemetryA.addData("Extend Position:", getPosition());
-        telemetryA.addData("Extender RunTo:", motorRunTo);
+        telemetryA.addData("Extender RunTo:", usePidf);
     }
 
     /**
@@ -95,8 +96,8 @@ public class ExtenderSubsystem extends StealthSubsystem {
      * @param position position in % of max range
      */
     public void setPosition(double position) {
-        pidf.setSetPoint(position * MAX_HEIGHT);
-        motorRunTo = true;
+        pidf.setSetPoint(position * maxHeight);
+        usePidf = true;
     }
 
     /**
@@ -115,7 +116,7 @@ public class ExtenderSubsystem extends StealthSubsystem {
      */
     public Command endSetPositionCommand(long timeout) {
         long endTime = System.currentTimeMillis() + timeout;
-        return new WaitUntilCommand(()-> !motorRunTo || System.currentTimeMillis() >= endTime);
+        return new WaitUntilCommand(()-> !usePidf || System.currentTimeMillis() >= endTime);
     }
 
     /**
@@ -124,7 +125,7 @@ public class ExtenderSubsystem extends StealthSubsystem {
      */
     public Command setPositionCommand(double position) {
         return this.runOnce(()-> setPosition(position))
-                .andThen(new WaitUntilCommand(()-> !motorRunTo));
+                .andThen(new WaitUntilCommand(()-> !usePidf));
     }
 
     /**
@@ -136,14 +137,14 @@ public class ExtenderSubsystem extends StealthSubsystem {
     public Command setPositionCommand(double position, long timeout) {
         long endTime = System.currentTimeMillis() + timeout;
         return this.runOnce(()-> setPosition(position))
-                .andThen(new WaitUntilCommand(()-> !motorRunTo || System.currentTimeMillis() >= endTime));
+                .andThen(new WaitUntilCommand(()-> !usePidf || System.currentTimeMillis() >= endTime));
     }
 
     /**
      * Stops the run to position
      */
     public void stopRunTo() {
-        motorRunTo = false;
+        usePidf = false;
     }
 
     /**
@@ -151,15 +152,15 @@ public class ExtenderSubsystem extends StealthSubsystem {
      * @return current position
      */
     public int getPosition() {
-        return armright.getCurrentPosition();
+        return armRight.getCurrentPosition();
     }
 
     /**
      * Resets the encoder of the extend motor
      */
     public void resetEncoder() {
-        armright.resetEncoder();
-        armleft.resetEncoder();
+        armRight.resetEncoder();
+        armLeft.resetEncoder();
         motors.resetEncoder();
         motors.setRunMode(Motor.RunMode.RawPower);
     }

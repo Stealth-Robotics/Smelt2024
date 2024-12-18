@@ -21,23 +21,25 @@ import org.stealthrobotics.library.StealthSubsystem;
  */
 @Config
 public class LifterSubsystem extends StealthSubsystem {
+
+    public static final double HOLD_POWER = 0.1;
     private final MotorEx LeftElevator;
     private final MotorEx RightElevator;
     private static final String Left_Elevator = "leftelle";
     private static final String Right_Elevator = "rightelle";
     private final Telemetry telemetryA;
 
-    public static double kP = 0.006;
-    public static double kI = 0.00;
-    public static double kD = 0.0;
-    public static double kF = 0.00;
+    private static final double kP = 0.006;
+    private static final double kI = 0.00;
+    private static final double kD = 0.0;
+    private static final double kF = 0.00;
 
-    public Boolean motorRunTo = false;
+    private Boolean usingPidf = false;
 
-    public static final double TOLERANCE = 10.0;
-    private final double maxSpeed = 1;
+    private static final double tolerance = 10.0;
+    private static final double maxSpeed = 1;
 
-    private static final double MAX_HEIGHT = 4367;
+    private static final double maxHeight = 4367;
 
     private final PIDFController pidf = new PIDFController(kP, kI, kD, kF);
     private final MotorGroup motors;
@@ -48,12 +50,12 @@ public class LifterSubsystem extends StealthSubsystem {
         this.telemetryA = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         LeftElevator = new MotorEx(hardwareMap, Left_Elevator);
         RightElevator = new MotorEx(hardwareMap, Right_Elevator);
-        pidf.setTolerance(TOLERANCE);
-        // Use MotorGroup for multiple motors
         RightElevator.setInverted(true);
-        RightElevator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        LeftElevator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+
         motors = new MotorGroup(LeftElevator, RightElevator);
+        motors.setRunMode(Motor.RunMode.RawPower);
+        motors.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        pidf.setTolerance(tolerance);
         resetEncoder();
     }
 
@@ -62,21 +64,19 @@ public class LifterSubsystem extends StealthSubsystem {
      */
     @Override
     public void periodic() {
-        if (motorRunTo) {
+        if (usingPidf) {
             double power = pidf.calculate(getPosition());
             motors.set(power * -maxSpeed);
 
-            if (pidf.atSetPoint()) {
-                motors.set(.1);
-                motorRunTo = false;
-            }
-        }
-        else {
-            motors.set(.1);
+//            if (pidf.atSetPoint()) {
+//                motors.set(HOLD_POWER);
+//                usingPidf = false;
+//            }
         }
 
+
         telemetryA.addData("Lift Position:", getPosition());
-        telemetryA.addData("motorRunTo:", motorRunTo);
+        telemetryA.addData("usingPidf:", usingPidf);
     }
 
     /**
@@ -95,7 +95,7 @@ public class LifterSubsystem extends StealthSubsystem {
      */
     public Command endSetPositionCommand(long timeout) {
         long endTime = System.currentTimeMillis() + timeout;
-        return new WaitUntilCommand(()-> (!motorRunTo || System.currentTimeMillis() >= endTime));
+        return new WaitUntilCommand(()-> (!usingPidf || System.currentTimeMillis() >= endTime));
     }
 
     /**
@@ -112,34 +112,17 @@ public class LifterSubsystem extends StealthSubsystem {
      * @param position position in % of max range
      */
     public void setPosition(double position) {
-        pidf.setSetPoint(position * MAX_HEIGHT);
-        motorRunTo = true;
+        pidf.setSetPoint(position * maxHeight);
+        usingPidf = true;
     }
 
-    /**
-     * Blocking function to set the position of the lift motor in % of max range
-     * @param position 0 to 1 in % of max range
-     */
-    public void doPosition(double position) {
-        pidf.setSetPoint(position * MAX_HEIGHT);
-        motorRunTo = true;
-        while (motorRunTo) {
-            double power = pidf.calculate(getPosition());
-            motors.set(-power * maxSpeed);
-
-            if (pidf.atSetPoint()) {
-                motors.set(-.1);
-                motorRunTo = false;
-            }
-        }
-    }
 
     /**
      * Stops the motor(s) from autonomously moving
      */
     public void stopRunTo()
     {
-        motorRunTo = false;
+        usingPidf = false;
     }
 
     /**
@@ -165,7 +148,7 @@ public class LifterSubsystem extends StealthSubsystem {
      */
     public Command setPositionCommand(double position) {
         return this.runOnce(()-> setPosition(position))
-                .andThen(new WaitUntilCommand(()-> !motorRunTo));
+                .andThen(new WaitUntilCommand(()-> !usingPidf));
     }
 
     /**
@@ -177,7 +160,7 @@ public class LifterSubsystem extends StealthSubsystem {
     public Command setPositionCommand(double position, long timeout) {
         long endTime = System.currentTimeMillis() + timeout;
         return this.runOnce(()-> setPosition(position))
-                .andThen(new WaitUntilCommand(()-> (!motorRunTo || System.currentTimeMillis() > endTime)));
+                .andThen(new WaitUntilCommand(()-> (!usingPidf || System.currentTimeMillis() > endTime)));
     }
 
     /**

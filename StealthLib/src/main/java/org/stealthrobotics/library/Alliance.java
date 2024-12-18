@@ -1,6 +1,6 @@
 package org.stealthrobotics.library;
 
-import androidx.annotation.NonNull;
+//import androidx.annotation.NonNull;
 
 /**
  * Stores whether we're on the Red or Blue Alliance
@@ -52,7 +52,7 @@ public enum Alliance {
         return alliance == Alliance.BLUE;
     }
 
-    @NonNull
+    //@NonNull
     @Override
     public String toString() {
         return alliance == RED ? "RED" : "BLUE";

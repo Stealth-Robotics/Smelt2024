@@ -74,6 +74,14 @@ public class PathManager {
         bluePathSegments.clear();
         redPathSegments.clear();
         currentPath = 0;
+        
+        if (pathSegmentIndices.isEmpty())
+        {
+            bluePathSegments.add(bluePathChain);
+            redPathSegments.add(redPathChain);
+            return;
+        }
+        
         for (int i = 0; i < pathSegmentIndices.size(); i++) {
             int start = pathSegmentIndices.get(i).fst;
             int end = pathSegmentIndices.get(i).snd;
