@@ -50,8 +50,6 @@ public class FollowerCommand extends CommandBase {
      */
     @Override
     public void initialize(){
-        toggleRobotCentric = false;
-        slowMode = false;
     }
 
     /**

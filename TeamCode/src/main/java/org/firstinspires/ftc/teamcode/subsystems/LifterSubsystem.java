@@ -9,8 +9,6 @@ import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.arcrobotics.ftclib.hardware.motors.MotorGroup;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -23,39 +21,33 @@ import org.stealthrobotics.library.StealthSubsystem;
 public class LifterSubsystem extends StealthSubsystem {
 
     public static final double HOLD_POWER = 0.1;
-    private final MotorEx LeftElevator;
-    private final MotorEx RightElevator;
-    private static final String Left_Elevator = "leftelle";
-    private static final String Right_Elevator = "rightelle";
-    private final Telemetry telemetryA;
-
-    private static final double kP = 0.006;
-    private static final double kI = 0.00;
-    private static final double kD = 0.0;
-    private static final double kF = 0.00;
-
-    private Boolean usingPidf = false;
-
-    private static final double tolerance = 10.0;
-    private static final double maxSpeed = 1;
-
-    private static final double maxHeight = 4367;
-
-    private final PIDFController pidf = new PIDFController(kP, kI, kD, kF);
+    private static final String LEFT_ELEVATOR = "leftelle";
+    private static final String RIGHT_ELEVATOR = "rightelle";
+    private static final double KP = 0.006;
+    private static final double KI = 0.00;
+    private static final double KD = 0.0;
+    private static final double KF = 0.00;
+    private static final double TOLERANCE = 10.0;
+    private static final double MAX_SPEED = 1;
+    private static final double MAX_HEIGHT = 4367;
+    private final PIDFController pidf = new PIDFController(KP, KI, KD, KF);
     private final MotorGroup motors;
-
+    private final MotorEx leftElevator;
+    private final MotorEx rightElevator;
+    private final Telemetry telemetryA;
+    private Boolean usingPidf = false;
 
     public LifterSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
 
         this.telemetryA = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        LeftElevator = new MotorEx(hardwareMap, Left_Elevator);
-        RightElevator = new MotorEx(hardwareMap, Right_Elevator);
-        RightElevator.setInverted(true);
+        leftElevator = new MotorEx(hardwareMap, LEFT_ELEVATOR);
+        rightElevator = new MotorEx(hardwareMap, RIGHT_ELEVATOR);
+        rightElevator.setInverted(true);
 
-        motors = new MotorGroup(LeftElevator, RightElevator);
+        motors = new MotorGroup(leftElevator, rightElevator);
         motors.setRunMode(Motor.RunMode.RawPower);
         motors.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        pidf.setTolerance(tolerance);
+        pidf.setTolerance(TOLERANCE);
         resetEncoder();
     }
 
@@ -66,7 +58,7 @@ public class LifterSubsystem extends StealthSubsystem {
     public void periodic() {
         if (usingPidf) {
             double power = pidf.calculate(getPosition());
-            motors.set(power * -maxSpeed);
+            motors.set(power * -MAX_SPEED);
 
 //            if (pidf.atSetPoint()) {
 //                motors.set(HOLD_POWER);
@@ -74,8 +66,8 @@ public class LifterSubsystem extends StealthSubsystem {
 //            }
         }
 
-
-        telemetryA.addData("Lift Position:", getPosition());
+        telemetryA.addData("Left Position:", leftElevator.getCurrentPosition());
+        telemetryA.addData("Right Position:", rightElevator.getCurrentPosition());
         telemetryA.addData("usingPidf:", usingPidf);
     }
 
@@ -112,7 +104,7 @@ public class LifterSubsystem extends StealthSubsystem {
      * @param position position in % of max range
      */
     public void setPosition(double position) {
-        pidf.setSetPoint(position * maxHeight);
+        pidf.setSetPoint(position * MAX_HEIGHT);
         usingPidf = true;
     }
 
@@ -130,7 +122,7 @@ public class LifterSubsystem extends StealthSubsystem {
      * @return current position
      */
     public int getPosition() {
-        return this.RightElevator.getCurrentPosition();
+        return this.rightElevator.getCurrentPosition();
     }
 
     /**

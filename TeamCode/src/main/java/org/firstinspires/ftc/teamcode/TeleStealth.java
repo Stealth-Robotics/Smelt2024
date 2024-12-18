@@ -83,23 +83,23 @@ public class TeleStealth extends StealthOpMode {
                 () -> driver.getLeftX(),
                 () -> (driver.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) - driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
         fss.setDefaultCommand(cmd);
-        driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(new InstantCommand(cmd::toggleSlowMode));
+        driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(cmd::toggleSlowMode);
         driver.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(cmd::toggleRobotCentric));
         driver.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new InstantCommand(cmd::resetImu));
 
-        operator.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new InstantCommand((intakecmd::toggleState)));
-        operator.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new InstantCommand((intakecmd::toggleStatebackwards)));
+        operator.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new InstantCommand((intake::toggleStateForward)));
+        operator.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new InstantCommand((intake::toggleStateBackwards)));
 
-        operator.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand((outputLiftcmd::setClip)));
-        operator.getGamepadButton(GamepadKeys.Button.B).whenPressed(new InstantCommand((outputLiftcmd::setDown)));
-        operator.getGamepadButton(GamepadKeys.Button.X).whenPressed(new InstantCommand((outputLiftcmd::setDump)));
-        operator.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new InstantCommand((outputLiftcmd::setMax)));
+        operator.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand((output::setClip)));
+        operator.getGamepadButton(GamepadKeys.Button.B).whenPressed(new InstantCommand((output::setDown)));
+        operator.getGamepadButton(GamepadKeys.Button.X).whenPressed(new InstantCommand((output::setDump)));
+        operator.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new InstantCommand((output::setMax)));
 
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(new InstantCommand((clipscmd::toggleOpen)));
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(new InstantCommand((clipscmd::toggleClose)));
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(new InstantCommand((clips::setOpen)));
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(new InstantCommand((clips::setClose)));
 
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new InstantCommand((rotatecmd::toggleClips)));
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(new InstantCommand((rotatecmd::toggleBucket)));
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new InstantCommand((rotate::toggleClips)));
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(new InstantCommand((rotate::toggleBucket)));
 
 
         LifterDefaultCommand liftCmd = new LifterDefaultCommand(

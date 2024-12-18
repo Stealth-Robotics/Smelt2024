@@ -10,6 +10,9 @@ import org.stealthrobotics.library.StealthSubsystem;
 
 public class ClipsSubsystem extends StealthSubsystem {
     private static final String CLIP_NAME = "clips";
+    private static final double CLIP_OPEN = 0.6;
+    private static final double CLIP_CLOSE = 0;
+
     private final Telemetry telemetryA;
     private final CRServo clips;
     public ClipsSubsystem(HardwareMap hardwareMap, Telemetry telemetry)
@@ -30,4 +33,9 @@ public class ClipsSubsystem extends StealthSubsystem {
         telemetryA.addData("Clips Pos", clips.getController().getServoPosition(clips.getPortNumber()));
         telemetryA.addData("Clips", clips.getPower());
     }
+
+    public void setOpen(){clips.setPower(CLIP_OPEN);}
+    public void setClose(){clips.setPower(CLIP_CLOSE);}
+
+
 }

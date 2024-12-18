@@ -9,8 +9,6 @@ import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.arcrobotics.ftclib.hardware.motors.MotorGroup;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -21,39 +19,38 @@ import org.stealthrobotics.library.StealthSubsystem;
  */
 @Config
 public class ExtenderSubsystem extends StealthSubsystem {
-    private static final String Left_Arm = "leftarm";
-    private static final String Right_Arm = "rightarm";
+    private static final String LEFT_ARM = "leftarm";
+    private static final String RIGHT_ARM = "rightarm";
     private final Telemetry telemetryA;
 
     // Adjust these values for your arm. These will need to change
     // based on arm weight and total range of the arm
-    private static final double kP = 0.007;
-    private static final double kI = 0.00;
-    private static final double kD = 0.0;
-    private static final double kF = 0.00;
+    private static final double KP = 0.007;
+    private static final double KI = 0.00;
+    private static final double KD = 0.0;
+    private static final double KF = 0.00;
 
     // This should be the maximum encoder extension of the arm(s)
-    private static final double maxHeight = 2180;
+    private static final double MAX_HEIGHT = 2180;
 
     // Acceptable position error to be considered at target location
-    private static final double tolerance = 10.0;
+    private static final double TOLERANCE = 10.0;
+    private static final double MAX_SPEED = 1;
     private Boolean usePidf = false;
-    private static final double maxSpeed = 1;
     private final MotorEx armRight;
     private final MotorEx armLeft;
     private final MotorGroup motors;
 
-
     // PIDF to control arm movement keeps the arm from overshooting etc.
-    private final PIDFController pidf = new PIDFController(kP, kI, kD, kF);
+    private final PIDFController pidf = new PIDFController(KP, KI, KD, KF);
 
     public ExtenderSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
 
         this.telemetryA = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        armRight = new MotorEx(hardwareMap, Left_Arm);
-        armLeft = new MotorEx(hardwareMap, Right_Arm);
+        armRight = new MotorEx(hardwareMap, LEFT_ARM);
+        armLeft = new MotorEx(hardwareMap, RIGHT_ARM);
         motors = new MotorGroup(armLeft, armRight);
-        pidf.setTolerance(tolerance);
+        pidf.setTolerance(TOLERANCE);
 
         armRight.setInverted(true);
         motors.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
@@ -70,7 +67,7 @@ public class ExtenderSubsystem extends StealthSubsystem {
     public void periodic() {
         if (usePidf) {
             double power = pidf.calculate(getPosition());
-            motors.set(power * maxSpeed);
+            motors.set(power * MAX_SPEED);
 
             if (pidf.atSetPoint()) {
                 motors.set(0);
@@ -96,7 +93,7 @@ public class ExtenderSubsystem extends StealthSubsystem {
      * @param position position in % of max range
      */
     public void setPosition(double position) {
-        pidf.setSetPoint(position * maxHeight);
+        pidf.setSetPoint(position * MAX_HEIGHT);
         usePidf = true;
     }
 
