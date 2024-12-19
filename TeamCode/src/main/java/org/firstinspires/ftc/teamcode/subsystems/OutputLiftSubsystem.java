@@ -14,11 +14,18 @@ import org.stealthrobotics.library.StealthSubsystem;
 //Servo value for dumping - 0.7389
 public class OutputLiftSubsystem extends StealthSubsystem {
     private static final String LEFT_BUCKET_LIFT_NAME = "leftbucketlift";
-
+    private enum LiftState {
+        CLIP_POSITION,
+        DOWN_POSITION,
+        DUMP_POSITION,
+        MAX_POSITION
+    }
     private static final double BUCKET_CLIP_POSITION = 0.6661;
     private static final double BUCKET_DOWN_POSITION = 0.9289;
     private static final double BUCKET_DUMP_POSITION = 0.7389;
     private static final double BUCKET_MAX_POSITION = 0.25;
+
+    private LiftState state = LiftState.DOWN_POSITION;
 
     private final Telemetry telemetryA;
     private final Servo leftBucketLift;
@@ -28,12 +35,15 @@ public class OutputLiftSubsystem extends StealthSubsystem {
         telemetryA = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
     }
-    public void setLeftPosition(double position){
+
+    private void setLeftPosition(double position){
         leftBucketLift.setPosition(position);
     }
     public double getLeftPosition() {
         return leftBucketLift.getPosition();
     }
+
+    public boolean isDownPosition(){ return state == LiftState.DOWN_POSITION;}
 
     @Override
     public void periodic(){
@@ -42,15 +52,19 @@ public class OutputLiftSubsystem extends StealthSubsystem {
     }
 
     public void setClip(){
+        state = LiftState.CLIP_POSITION;
         setLeftPosition(BUCKET_CLIP_POSITION);
     }
     public void setDown(){
+        state = LiftState.DOWN_POSITION;
         setLeftPosition(BUCKET_DOWN_POSITION);
     }
     public void setDump(){
+        state = LiftState.DUMP_POSITION;
         setLeftPosition(BUCKET_DUMP_POSITION);
     }
     public void setMax(){
+        state = LiftState.MAX_POSITION;
         setLeftPosition(BUCKET_MAX_POSITION);
     }
 }
