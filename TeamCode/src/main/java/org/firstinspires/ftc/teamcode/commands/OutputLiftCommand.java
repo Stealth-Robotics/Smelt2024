@@ -3,15 +3,15 @@ package org.firstinspires.ftc.teamcode.commands;
 import com.arcrobotics.ftclib.command.CommandBase;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.subsystems.OutputSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.OutputLiftSubsystem;
 
 public class OutputLiftCommand extends CommandBase {
 
 
-    private final OutputSubsystem outputLift;
+    private final OutputLiftSubsystem outputLift;
 
 
-    public OutputLiftCommand(OutputSubsystem outputSubsystem, Telemetry telemetry) {
+    public OutputLiftCommand(OutputLiftSubsystem outputSubsystem, Telemetry telemetry) {
         this.outputLift = outputSubsystem;
         addRequirements(outputLift);
     }

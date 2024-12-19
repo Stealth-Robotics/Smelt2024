@@ -8,6 +8,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
 import org.firstinspires.ftc.teamcode.subsystems.FollowerSubsystem;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 /**
@@ -26,6 +27,7 @@ public class FollowerCommand extends CommandBase {
 
     // Rotational input for Z
     private final DoubleSupplier zx;
+    private final BooleanSupplier isSlow;
 
 
     // setting to false means field centric
@@ -35,12 +37,13 @@ public class FollowerCommand extends CommandBase {
     private static final double slowPower = .5;
     private boolean slowMode = false;
 
-    public FollowerCommand(FollowerSubsystem subsystem, Telemetry telemetry, DoubleSupplier x, DoubleSupplier y, DoubleSupplier zx){
+    public FollowerCommand(FollowerSubsystem subsystem, Telemetry telemetry, DoubleSupplier x, DoubleSupplier y, DoubleSupplier zx, BooleanSupplier isSlow){
         this.subsystem = subsystem;
         this.telemetryA = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         this.x = x;
         this.y = y;
         this.zx = zx;
+        this.isSlow = isSlow;
         // this must be added to the command group or the subsystem will fail to initialize
         addRequirements(subsystem);
     }
@@ -58,6 +61,12 @@ public class FollowerCommand extends CommandBase {
     @Override
     public void execute(){
         Follower follower = subsystem.getFollower();
+        if (isSlow.getAsBoolean()){
+            follower.setMaxPower(slowPower);
+        }
+        else{
+            follower.setMaxPower(maxPower);
+        }
         follower.setTeleOpMovementVectors(x.getAsDouble(), y.getAsDouble(), zx.getAsDouble(), toggleRobotCentric);
         follower.update();
     }

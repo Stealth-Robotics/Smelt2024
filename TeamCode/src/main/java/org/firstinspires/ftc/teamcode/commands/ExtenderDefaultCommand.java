@@ -17,7 +17,7 @@ public class ExtenderDefaultCommand extends CommandBase {
     private final MultipleTelemetry telemetryA;
     private final DoubleSupplier extendAxis;
     private boolean manualControl = false;
-    private static final double axisDeadZone = 0.05;
+    private static final double axisDeadZone = 0.15;
 
 
     public ExtenderDefaultCommand(ExtenderSubsystem extender, Telemetry telemetry, DoubleSupplier extendAxis) {

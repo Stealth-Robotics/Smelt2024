@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.commands.ExtenderDefaultCommand;
 import org.firstinspires.ftc.teamcode.commands.FollowerCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeElbowCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeSuckCommand;
-import org.firstinspires.ftc.teamcode.commands.IntakeWristCommand;
+import org.firstinspires.ftc.teamcode.commands.OutputCombinedCommand;
 import org.firstinspires.ftc.teamcode.commands.LifterDefaultCommand;
 import org.firstinspires.ftc.teamcode.commands.OutputLiftCommand;
 import org.firstinspires.ftc.teamcode.commands.OutputRotateCommand;
@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeWristSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LifterSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.OutputRotationSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.OutputSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.OutputLiftSubsystem;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
 // Example of using the Stealth library for TeleOp driving
@@ -61,17 +61,21 @@ public class TeleStealth extends StealthOpMode {
         ExtenderSubsystem extender = new ExtenderSubsystem(hardwareMap, telemetry);
         IntakeSubsystem intake = new IntakeSubsystem(hardwareMap, telemetry);
        ClipsSubsystem clips = new ClipsSubsystem(hardwareMap, telemetry);
-        OutputSubsystem output = new OutputSubsystem(hardwareMap,telemetry);
+        OutputLiftSubsystem output = new OutputLiftSubsystem(hardwareMap,telemetry);
         IntakeElbowSubsystem intakeElbow = new IntakeElbowSubsystem(hardwareMap, telemetry);
         OutputRotationSubsystem rotate = new OutputRotationSubsystem(hardwareMap, telemetry);
         IntakeWristSubsystem wrist = new IntakeWristSubsystem(hardwareMap, telemetry);
         register(fss, lifter, extender, intake);
-        IntakeSuckCommand intakecmd = new IntakeSuckCommand(intake, telemetry);
+        IntakeSuckCommand intakecmd = new IntakeSuckCommand(
+                intake,
+                () -> (operator.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) - operator.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)),
+                telemetry);
+        intake.setDefaultCommand(intakecmd);
         ClipsCommand clipscmd = new ClipsCommand(clips, telemetry);
         OutputRotateCommand rotatecmd = new OutputRotateCommand(rotate, telemetry);
         OutputLiftCommand outputLiftcmd = new OutputLiftCommand(output, telemetry);
         IntakeElbowCommand intakeelbowcmd = new IntakeElbowCommand(intakeElbow, telemetry);
-        IntakeWristCommand intakewristcmd = new IntakeWristCommand(wrist, telemetry);
+        OutputCombinedCommand outputcombinedcmd = new OutputCombinedCommand(rotate, output, telemetry);
         // this is setting for telemetry to be sent to the driver station
         fss.getFollower().setStartingPose(startPose);
         // registers for the periodic to be called (telemetry)
@@ -81,19 +85,18 @@ public class TeleStealth extends StealthOpMode {
                 telemetry,
                 () -> -driver.getLeftY(),
                 () -> driver.getLeftX(),
-                () -> (driver.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) - driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
+                () -> (driver.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) - driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)),
+                () -> driver.getGamepadButton(GamepadKeys.Button.A).get());
         fss.setDefaultCommand(cmd);
-        driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(cmd::toggleSlowMode);
-        driver.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(cmd::toggleRobotCentric));
         driver.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new InstantCommand(cmd::resetImu));
-
         operator.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new InstantCommand((intake::toggleStateForward)));
         operator.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new InstantCommand((intake::toggleStateBackwards)));
 
-        operator.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand((output::setClip)));
-        operator.getGamepadButton(GamepadKeys.Button.B).whenPressed(new InstantCommand((output::setDown)));
-        operator.getGamepadButton(GamepadKeys.Button.X).whenPressed(new InstantCommand((output::setDump)));
-        operator.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new InstantCommand((output::setMax)));
+
+        operator.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand((outputcombinedcmd::setClipGrab)));
+        operator.getGamepadButton(GamepadKeys.Button.B).whenPressed(new InstantCommand((outputcombinedcmd::setIntakeReadyBucket)));
+        operator.getGamepadButton(GamepadKeys.Button.X).whenPressed(new InstantCommand((outputcombinedcmd::setDumpBucket)));
+        operator.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new InstantCommand((outputcombinedcmd::setClipScore)));
 
         operator.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(new InstantCommand((clips::setOpen)));
         operator.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(new InstantCommand((clips::setClose)));
@@ -105,7 +108,7 @@ public class TeleStealth extends StealthOpMode {
         LifterDefaultCommand liftCmd = new LifterDefaultCommand(
                 lifter,
                 telemetry,
-                ()-> driver.getRightY());
+                ()-> -driver.getRightY());
 
         lifter.setDefaultCommand(liftCmd);
         ExtenderDefaultCommand extenderCmd = new ExtenderDefaultCommand(

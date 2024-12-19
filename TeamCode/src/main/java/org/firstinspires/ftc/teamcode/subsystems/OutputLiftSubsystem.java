@@ -12,7 +12,7 @@ import org.stealthrobotics.library.StealthSubsystem;
 //Servo value for clip pick up - 0.6661
 //Servo value for maximum - 0.25
 //Servo value for dumping - 0.7389
-public class OutputSubsystem extends StealthSubsystem {
+public class OutputLiftSubsystem extends StealthSubsystem {
     private static final String LEFT_BUCKET_LIFT_NAME = "leftbucketlift";
 
     private static final double BUCKET_CLIP_POSITION = 0.6661;
@@ -22,16 +22,16 @@ public class OutputSubsystem extends StealthSubsystem {
 
     private final Telemetry telemetryA;
     private final Servo leftBucketLift;
-    public OutputSubsystem(HardwareMap hardwareMap, Telemetry telemetry)
+    public OutputLiftSubsystem(HardwareMap hardwareMap, Telemetry telemetry)
     {
         leftBucketLift = hardwareMap.get(Servo.class, LEFT_BUCKET_LIFT_NAME);
         telemetryA = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
     }
-    public void setPosition(double position){
+    public void setLeftPosition(double position){
         leftBucketLift.setPosition(position);
     }
-    public double getPosition() {
+    public double getLeftPosition() {
         return leftBucketLift.getPosition();
     }
 
@@ -41,8 +41,16 @@ public class OutputSubsystem extends StealthSubsystem {
         telemetryA.addData("Arm", leftBucketLift.getPosition());
     }
 
-    public void setClip(){setPosition(BUCKET_CLIP_POSITION);}
-    public void setDown(){setPosition(BUCKET_DOWN_POSITION);}
-    public void setDump(){setPosition(BUCKET_DUMP_POSITION);}
-    public void setMax(){setPosition(BUCKET_MAX_POSITION);}
+    public void setClip(){
+        setLeftPosition(BUCKET_CLIP_POSITION);
+    }
+    public void setDown(){
+        setLeftPosition(BUCKET_DOWN_POSITION);
+    }
+    public void setDump(){
+        setLeftPosition(BUCKET_DUMP_POSITION);
+    }
+    public void setMax(){
+        setLeftPosition(BUCKET_MAX_POSITION);
+    }
 }
