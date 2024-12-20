@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.arcrobotics.ftclib.command.Command;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -13,14 +16,15 @@ public class ClipsSubsystem extends StealthSubsystem {
     private static final double CLIP_OPEN = 0.6;
     private static final double CLIP_CLOSE = 0;
 
-    private final Telemetry telemetryA;
+    private static Boolean toggleClosed = false;
+
+
     private final CRServo clips;
-    public ClipsSubsystem(HardwareMap hardwareMap, Telemetry telemetry)
+    public ClipsSubsystem(HardwareMap hardwareMap)
     {
         clips = hardwareMap.get(CRServo.class, CLIP_NAME);
-        telemetryA = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-
     }
+
     public void setPower(double speed){
         clips.setPower(speed);
     }
@@ -30,12 +34,35 @@ public class ClipsSubsystem extends StealthSubsystem {
     @Override
     public void periodic()
     {
-        telemetryA.addData("Clips Pos", clips.getController().getServoPosition(clips.getPortNumber()));
-        telemetryA.addData("Clips", clips.getPower());
+        telemetry.addData("Clips Pos", clips.getController().getServoPosition(clips.getPortNumber()));
+        telemetry.addData("Clips", clips.getPower());
     }
 
-    public void setOpen(){clips.setPower(CLIP_OPEN);}
-    public void setClose(){clips.setPower(CLIP_CLOSE);}
+    public void setOpen(){
+        toggleClosed = false;
+        clips.setPower(CLIP_OPEN);}
+    public void setClose(){
+        toggleClosed = true;
+        clips.setPower(CLIP_CLOSE);
+    }
 
+    public void toggle(){
+        if(toggleClosed){
+            setOpen();
+        }else{
+            setClose();
+        }
+    }
+
+    public Command setOpenCmd(){
+        return runOnce(this::setOpen);
+    }
+    public Command setCloseCmd(){
+        return runOnce(this::setClose);
+    }
+
+    public Command toggleCmd(){
+        return runOnce(this::toggle);
+    }
 
 }

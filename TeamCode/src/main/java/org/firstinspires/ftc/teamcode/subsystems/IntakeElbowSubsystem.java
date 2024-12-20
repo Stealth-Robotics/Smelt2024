@@ -1,10 +1,9 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.arcrobotics.ftclib.command.Command;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.commands.IntakeElbowCommand;
 import org.stealthrobotics.library.StealthSubsystem;
 
 //leftintakedump pos: 0.036
@@ -25,11 +24,20 @@ public class IntakeElbowSubsystem extends StealthSubsystem {
     private static final double RIGHT_INTAKE_MIDDLE_POS = 0.5;
     private final Servo intakeElbowLeft;
     private final Servo intakeElbowRight;
-    public IntakeElbowSubsystem(HardwareMap hardwareMap, Telemetry telemetry){
+    private boolean isStartPosition = false;
+
+    public IntakeElbowSubsystem(HardwareMap hardwareMap){
         intakeElbowLeft = hardwareMap.get(Servo.class, INTAKE_ELBOW_LEFT_NAME);
         intakeElbowRight = hardwareMap.get(Servo.class, INTAKE_ELBOW_RIGHT_NAME);
     }
 
+    @Override
+    public void periodic() {
+        if (isStartPosition) {
+            setUp();
+            isStartPosition = true;
+        }
+    }
     public void setDump()
     {
         intakeElbowLeft.setPosition(LEFT_INTAKE_DUMP_POS);
@@ -45,6 +53,18 @@ public class IntakeElbowSubsystem extends StealthSubsystem {
     public void setUp() {
         intakeElbowLeft.setPosition(LEFT_INTAKE_UP_POS);
         intakeElbowRight.setPosition(RIGHT_INTAKE_MIDDLE_POS);
+    }
+
+    public Command setDumpCmd(){
+        return runOnce(this::setDump);
+    }
+
+    public Command setPickupCmd(){
+        return runOnce(this::setPickup);
+    }
+
+    public Command setUpCmd() {
+        return runOnce(this::setUp);
     }
 
 }

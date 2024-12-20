@@ -25,7 +25,7 @@ public class PathExampleAuto extends StealthAutoMode {
     public void initialize() {
 
         super.initialize();
-        telemetryA.addLine("Example path of using the follower");
+        telemetry.addLine("Example path of using the follower");
         path = new OutAndBackPath();
         commandGroup.addCommands(initPath(), runPath());
     }

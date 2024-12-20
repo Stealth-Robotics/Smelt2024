@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.arcrobotics.ftclib.command.Command;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -31,14 +34,12 @@ public class OutputRotationSubsystem extends StealthSubsystem {
 
     private rotationState state = rotationState.INTAKE_READY;
 
-    private final Telemetry telemetryA;
-    private final Servo leftOutputRotate;
+   private final Servo leftOutputRotate;
     private final Servo rightOutputRotate;
     
-    public OutputRotationSubsystem(HardwareMap hardwareMap, Telemetry telemetry){
+    public OutputRotationSubsystem(HardwareMap hardwareMap){
         leftOutputRotate = hardwareMap.get(Servo.class, LEFT_BUCKET_ROTATE_NAME);
         rightOutputRotate = hardwareMap.get(Servo.class, RIGHT_BUCKET_ROTATE_NAME);
-        telemetryA = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
     }
 
     public void setLeftPosition(double position){ leftOutputRotate.setPosition(position);}
@@ -47,8 +48,8 @@ public class OutputRotationSubsystem extends StealthSubsystem {
     public double getRightPosition() {return rightOutputRotate.getPosition();}
     @Override
     public void periodic(){
-        telemetryA.addData("getPosition", getLeftPosition());
-        telemetryA.addData("getPosition", getRightPosition());
+        telemetry.addData("getPosition", getLeftPosition());
+        telemetry.addData("getPosition", getRightPosition());
     }
 
     public void setIntakeReady() {
@@ -93,5 +94,15 @@ public class OutputRotationSubsystem extends StealthSubsystem {
                 setIntakeReady();
 
         }
+    }
+
+    public Command setIntakeReadyCmd(){
+        return runOnce(this::setIntakeReady);
+    }
+    public Command setClipCmd(){
+        return runOnce(this::setClip);
+    }
+    public Command setBucketCmd() {
+        return runOnce(this::setBucket);
     }
 }

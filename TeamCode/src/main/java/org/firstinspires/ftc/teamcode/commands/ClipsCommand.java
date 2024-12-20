@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.commands;
 
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandBase;
+import com.arcrobotics.ftclib.command.InstantCommand;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.ClipsSubsystem;
@@ -14,9 +16,14 @@ public class ClipsCommand extends CommandBase {
         this.clips = clips;
         addRequirements(clips);
     }
-    @Override
-    public void execute(){
 
+    public Command setOpen() {
+        return new InstantCommand(clips::setOpen);
     }
+
+    public Command setClose() {
+        return new InstantCommand(clips::setClose);
+    }
+
 }
 

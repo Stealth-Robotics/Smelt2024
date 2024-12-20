@@ -46,12 +46,6 @@ public class AutoPushSamples extends StealthAutoMode {
         return new InstantCommand(() ->
         {
             Follower follower = followerSubsystem.getFollower();
-            if (avgPose != null) {
-                path.setStartPose(avgPose);
-            } else if (lastPose != null) {
-                path.setStartPose(lastPose);
-            }
-
             follower.setStartingPose(path.getStartPose());
             follower.update();
         });
@@ -69,7 +63,7 @@ public class AutoPushSamples extends StealthAutoMode {
         return
                 new SequentialCommandGroup(
                         followerSubsystem.followPathCommand(path.getNextSegment()),
-                        lss.startSetPositionCommand(0.5), // sets moving the arm but does not wait
+                        lifterSubsystem.startSetPositionCommand(0.5), // sets moving the arm but does not wait
                         followerSubsystem.followPathCommand(path.getNextSegment(), true),
                         doArmMovement()
                 );
@@ -82,10 +76,10 @@ public class AutoPushSamples extends StealthAutoMode {
      */
     private Command doArmMovement() {
         return new SequentialCommandGroup(
-                lss.setPositionCommand(0.01, 100),
-                ess.setPositionCommand(0.5, 500),
+                lifterSubsystem.setPositionCommand(0.01, 100),
+                extenderSubsystem.setPositionCommand(0.5, 500),
                 new WaitCommand(1000),
-                ess.setPositionCommand(0.01, 500)
+                extenderSubsystem.setPositionCommand(0.01, 500)
         );
     }
 

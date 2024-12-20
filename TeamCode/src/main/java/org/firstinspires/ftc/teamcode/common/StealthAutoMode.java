@@ -1,18 +1,17 @@
 package org.firstinspires.ftc.teamcode.common;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.qualcomm.hardware.limelightvision.LLResult;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.pedroPathing.localization.Pose;
-import org.firstinspires.ftc.teamcode.pedroPathing.tuning.FollowerConstants;
+import org.firstinspires.ftc.teamcode.subsystems.ClipsSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ExtenderSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.FollowerSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.IntakeElbowSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.IntakeWristSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LifterSubsystem;
-import org.firstinspires.ftc.teamcode.utils.MovementUtil;
+import org.firstinspires.ftc.teamcode.subsystems.OutputLiftSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.OutputRotationSubsystem;
 import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
@@ -27,13 +26,17 @@ import org.stealthrobotics.library.opmodes.StealthOpMode;
  */
 public abstract class StealthAutoMode extends StealthOpMode {
 
-    // Telemetry instances for driver station and dashboard
-    protected Telemetry telemetryA;
-
     // Subsystems for robot control
     protected FollowerSubsystem followerSubsystem; // For path following
-    protected LifterSubsystem lss; // For controlling the lifter
-    protected ExtenderSubsystem ess; // For controlling the extender
+    protected LifterSubsystem lifterSubsystem; // For controlling the lifter
+    protected ExtenderSubsystem extenderSubsystem; // For controlling the extender
+    protected IntakeSubsystem intakeSubsystem; // For controlling the intake
+    protected ClipsSubsystem clipsSubsystem; // For controlling the clips
+
+    protected OutputLiftSubsystem outputLiftSubsystem;
+    protected IntakeElbowSubsystem intakeElbowSubsystem;
+    protected OutputRotationSubsystem outputRotationSubsystem;
+    protected IntakeWristSubsystem intakeWristSubsystem;
 
     // Stores a set of commands to be executed on run.
     protected final SequentialCommandGroup commandGroup = new SequentialCommandGroup();
@@ -44,23 +47,24 @@ public abstract class StealthAutoMode extends StealthOpMode {
     // Average position of the robot over the last 500ms
     protected Pose avgPose;
 
-    // How often to calculate the average position
-    private static final long AVERAGE_WAIT_TIME = 100;
-
-    private long timer = 0;
-
     /**
      * Override this to setup your hardware, commands, button bindings, etc.
      * You can extend this by calling `super.initialize()` in your override.
      */
     @Override
     public void initialize() {
-        telemetryA = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        followerSubsystem = new FollowerSubsystem(hardwareMap, telemetry);
-        lss = new LifterSubsystem(hardwareMap, telemetry);
-        ess = new ExtenderSubsystem(hardwareMap, telemetry);
-        // registers the subsystems for running the periodic override when the match starts
-        register(followerSubsystem, lss, ess);
+        followerSubsystem = new FollowerSubsystem(hardwareMap);
+        lifterSubsystem = new LifterSubsystem(hardwareMap);
+        extenderSubsystem = new ExtenderSubsystem(hardwareMap);
+        intakeSubsystem = new IntakeSubsystem(hardwareMap);
+        clipsSubsystem = new ClipsSubsystem(hardwareMap);
+
+        outputLiftSubsystem = new OutputLiftSubsystem(hardwareMap,telemetry);
+        intakeElbowSubsystem = new IntakeElbowSubsystem(hardwareMap);
+        outputRotationSubsystem = new OutputRotationSubsystem(hardwareMap);
+        intakeWristSubsystem = new IntakeWristSubsystem(hardwareMap);
+        // schedules periodic method
+        register(followerSubsystem, lifterSubsystem, extenderSubsystem, intakeSubsystem, intakeElbowSubsystem, intakeWristSubsystem);
     }
 
     /**
@@ -71,7 +75,7 @@ public abstract class StealthAutoMode extends StealthOpMode {
      */
     @Override
     public void whileWaitingToStart() {
-        telemetryA.addData("Alliance", Alliance.get().toString());
+        telemetry.addData("Alliance", Alliance.get().toString());
     }
 
     /**
@@ -79,7 +83,7 @@ public abstract class StealthAutoMode extends StealthOpMode {
      * @return LifterSubsystem instance
      */
     public LifterSubsystem getLifter() {
-        return lss;
+        return lifterSubsystem;
     }
 
     /**
@@ -87,7 +91,7 @@ public abstract class StealthAutoMode extends StealthOpMode {
      * @return ExtenderSubsystem instance
      */
     public ExtenderSubsystem getExtender() {
-        return ess;
+        return extenderSubsystem;
     }
 
     /**

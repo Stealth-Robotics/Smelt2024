@@ -33,7 +33,6 @@ public class IntakeSuckCommand extends CommandBase {
         if(power > axisDeadZone || power < -axisDeadZone) {
             tel.addData("Op Trigger:", power);
             intake.setPower(power);
-
             manualControl = true;
         }
         else if (manualControl)

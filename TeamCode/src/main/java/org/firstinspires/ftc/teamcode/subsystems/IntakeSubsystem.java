@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.arcrobotics.ftclib.command.Command;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -17,14 +18,14 @@ public class IntakeSubsystem extends StealthSubsystem {
     private static final String INTAKE_NAME = "intakesuck";
     private final CRServo intakesuck;
 
-    private  static final double INTAKE_POWER = 1;
-    private  static final double OUTTAKE_POWER = -1;
+    private  static final double INTAKE_POWER = -1;
+    private  static final double OUTTAKE_POWER = 1;
 
     private static final double STOP_POWER = 0;
 
     private IntakeState state = IntakeState.STOPPED;
 
-    public IntakeSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+    public IntakeSubsystem(HardwareMap hardwareMap) {
         intakesuck = hardwareMap.get(CRServo.class, INTAKE_NAME);
 
     }
@@ -37,29 +38,43 @@ public class IntakeSubsystem extends StealthSubsystem {
         return intakesuck.getPower();
     }
 
-    public void setIntake(){ setPower(INTAKE_POWER); }
+    public void setIntake(){
+        state = IntakeState.INTAKING;
+        setPower(INTAKE_POWER);
+    }
 
     public void setOuttake(){
+        state = IntakeState.OUTTAKING;
         setPower(OUTTAKE_POWER);
     }
 
     public void setStopIntake() {
+        state = IntakeState.STOPPED;
         setPower(STOP_POWER);
+    }
+
+    public Command setIntakeCmd(){
+        return runOnce(this::setIntake);
+    }
+
+    public Command setOuttakeCmd(){
+        return runOnce(this::setOuttake);
+    }
+
+    public Command setStopIntakeCmd(){
+        return runOnce(this::setStopIntake);
     }
 
     public void toggleStateForward()
     {
         switch (state) {
             case STOPPED:
-                state = IntakeState.INTAKING;
                 setIntake();
                 break;
             case INTAKING:
-                state = IntakeState.OUTTAKING;
                 setOuttake();
                 break;
             default:
-                state = IntakeState.STOPPED;
                 setStopIntake();
         }
     }
@@ -68,15 +83,12 @@ public class IntakeSubsystem extends StealthSubsystem {
     {
         switch (state) {
             case STOPPED:
-                state = IntakeState.OUTTAKING;
-                setIntake();
-                break;
-            case OUTTAKING:
-                state = IntakeState.INTAKING;
                 setOuttake();
                 break;
+            case OUTTAKING:
+                setIntake();
+                break;
             default:
-                state = IntakeState.STOPPED;
                 setStopIntake();
         }
     }

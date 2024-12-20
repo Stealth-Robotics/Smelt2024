@@ -1,16 +1,14 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
-
 import org.firstinspires.ftc.teamcode.commands.ExtenderDefaultCommand;
 import org.firstinspires.ftc.teamcode.commands.FollowerCommand;
+import org.firstinspires.ftc.teamcode.commands.IntakeCombinedCmd;
 import org.firstinspires.ftc.teamcode.commands.IntakeSuckCommand;
-import org.firstinspires.ftc.teamcode.commands.OutputCombinedCommand;
 import org.firstinspires.ftc.teamcode.commands.LifterDefaultCommand;
+import org.firstinspires.ftc.teamcode.commands.OutputCombinedCmd;
 import org.firstinspires.ftc.teamcode.pedroPathing.localization.Pose;
 import org.firstinspires.ftc.teamcode.subsystems.ClipsSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ExtenderSubsystem;
@@ -30,7 +28,7 @@ public class TeleStealth extends StealthOpMode {
 
     // This is the starting position of the robot in inches. Blue home facing red bucket
     // is 0, 0, 0 + 1/2 the robot width and Length
-    private static final Pose startPose = new Pose(8.5, 48, 0);
+    private static final Pose startPose = new Pose(0, 0, 0);
 
     private GamepadEx driver;
     private GamepadEx operator;
@@ -49,28 +47,24 @@ public class TeleStealth extends StealthOpMode {
         driver = new GamepadEx(gamepad1);
         operator = new GamepadEx(gamepad2);
 
-        // You need to created two classes for each mechanism.
         // The Subsystem sets up the hardware and the command runs the code on the hardware
-        fss = new FollowerSubsystem(hardwareMap, telemetry);
-        LifterSubsystem lifter = new LifterSubsystem(hardwareMap, telemetry);
-        ExtenderSubsystem extender = new ExtenderSubsystem(hardwareMap, telemetry);
-        IntakeSubsystem intake = new IntakeSubsystem(hardwareMap, telemetry);
-        ClipsSubsystem clips = new ClipsSubsystem(hardwareMap, telemetry);
+        fss = new FollowerSubsystem(hardwareMap);
+        LifterSubsystem lifter = new LifterSubsystem(hardwareMap);
+        ExtenderSubsystem extender = new ExtenderSubsystem(hardwareMap);
+        IntakeSubsystem intake = new IntakeSubsystem(hardwareMap);
+        ClipsSubsystem clips = new ClipsSubsystem(hardwareMap);
         OutputLiftSubsystem output = new OutputLiftSubsystem(hardwareMap,telemetry);
-        IntakeElbowSubsystem intakeElbow = new IntakeElbowSubsystem(hardwareMap, telemetry);
-        OutputRotationSubsystem rotate = new OutputRotationSubsystem(hardwareMap, telemetry);
-        IntakeWristSubsystem wrist = new IntakeWristSubsystem(hardwareMap, telemetry);
-        register(fss, lifter, extender, intake);
+        IntakeElbowSubsystem intakeElbow = new IntakeElbowSubsystem(hardwareMap);
+        OutputRotationSubsystem rotate = new OutputRotationSubsystem(hardwareMap);
+        IntakeWristSubsystem wrist = new IntakeWristSubsystem(hardwareMap);
+        // schedules periodic method
+        register(fss, lifter, extender, intake, intakeElbow, wrist);
         IntakeSuckCommand intakeCmd = new IntakeSuckCommand(
                 intake,
                 () -> (operator.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) - operator.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)),
                 telemetry);
         intake.setDefaultCommand(intakeCmd);
-//        ClipsCommand clipsCmd = new ClipsCommand(clips, telemetry);
-//        OutputRotateCommand rotateCmd = new OutputRotateCommand(rotate, telemetry);
-//        OutputLiftCommand outputLiftCmd = new OutputLiftCommand(output, telemetry);
-//        IntakeElbowCommand intakeElbowCmd = new IntakeElbowCommand(intakeElbow, telemetry);
-        OutputCombinedCommand outputCombinedCmd = new OutputCombinedCommand(rotate, output, lifter, telemetry);
+
         // this is setting for telemetry to be sent to the driver station
         fss.getFollower().setStartingPose(startPose);
         // registers for the periodic to be called (telemetry)
@@ -78,40 +72,60 @@ public class TeleStealth extends StealthOpMode {
         FollowerCommand cmd = new FollowerCommand(
                 fss,
                 telemetry,
-                () -> -driver.getLeftY(),
-                () -> driver.getLeftX(),
+                () -> driver.getLeftY(),
+                () -> -driver.getLeftX(),
                 () -> (driver.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) - driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)),
                 () -> driver.getGamepadButton(GamepadKeys.Button.A).get());
         fss.setDefaultCommand(cmd);
 
         LifterDefaultCommand liftCmd = new LifterDefaultCommand(
                 lifter,
-                telemetry,
                 ()-> -operator.getRightY(),
-                ()-> driver.gamepad.guide);
+                ()-> driver.gamepad.touchpad);
+                //()-> driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).get());
 
         lifter.setDefaultCommand(liftCmd);
         ExtenderDefaultCommand extenderCmd = new ExtenderDefaultCommand(
                 extender,
-                telemetry,
-                ()-> operator.getRightX());
+                ()-> operator.getLeftY());
 
         extender.setDefaultCommand(extenderCmd);
-//        driver.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new InstantCommand(cmd::resetImu));
-//        driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(new InstantCommand(()->lifter.setPosition(.5)));
-//        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new InstantCommand(()->lifter.setPosition(.99)));
-//        driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(new InstantCommand(()->lifter.setPosition(.001)));
-//        driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(new InstantCommand(()->extender.setPosition(.5)));
+        OutputCombinedCmd outputCombinedCmd = new OutputCombinedCmd(
+                rotate,
+                output,
+                lifter,
+                clips,
+                ()-> operator.getGamepadButton(GamepadKeys.Button.A).get(),
+                ()-> operator.getGamepadButton(GamepadKeys.Button.B).get(),
+                ()-> operator.getGamepadButton(GamepadKeys.Button.X).get(),
+                ()-> operator.getGamepadButton(GamepadKeys.Button.Y).get());
 
-        operator.getGamepadButton(GamepadKeys.Button.A).whenPressed(outputCombinedCmd.setClipGrab());
-        operator.getGamepadButton(GamepadKeys.Button.B).whenPressed(new InstantCommand((outputCombinedCmd::setIntakeReadyBucket)));
-        operator.getGamepadButton(GamepadKeys.Button.X).whenPressed(outputCombinedCmd.setDumpBucket());
-        operator.getGamepadButton(GamepadKeys.Button.Y).whenPressed(outputCombinedCmd.setClipScore());
+        output.setDefaultCommand(outputCombinedCmd);
 
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(new InstantCommand((clips::setOpen)));
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(new InstantCommand((clips::setClose)));
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new InstantCommand((rotate::toggleClips)));
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(new InstantCommand((rotate::toggleBucket)));
+        IntakeCombinedCmd intakeCombinedCmd = new IntakeCombinedCmd(
+                intakeElbow,
+                wrist,
+                extender,
+                intake,
+                rotate,
+                lifter,
+                clips,
+                output,
+                ()-> operator.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).get(),
+                ()-> operator.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).get());
+        intakeElbow.setDefaultCommand(intakeCombinedCmd);
+
+        // This zeros the encoder regardless of position move the arms all the way in.
+        operator.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(extender::resetEncoder);
+        operator.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(lifter::resetEncoder);
+
+        operator.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(clips.setOpenCmd());
+        operator.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(clips.setCloseCmd());
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(lifter.startSetPositionCommand(.95));
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(lifter.startSetPositionCommand(.001));
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(wrist.setStartPositionCmd());
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(clips.toggleCmd());
+
     }
 
 

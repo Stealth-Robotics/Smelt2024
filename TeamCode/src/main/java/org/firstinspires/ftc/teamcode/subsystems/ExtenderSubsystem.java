@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.acmerobotics.dashboard.FtcDashboard;
+import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
+
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.controller.PIDFController;
@@ -21,7 +21,6 @@ import org.stealthrobotics.library.StealthSubsystem;
 public class ExtenderSubsystem extends StealthSubsystem {
     private static final String LEFT_ARM = "leftarm";
     private static final String RIGHT_ARM = "rightarm";
-    private final Telemetry telemetryA;
 
     // Adjust these values for your arm. These will need to change
     // based on arm weight and total range of the arm
@@ -31,11 +30,12 @@ public class ExtenderSubsystem extends StealthSubsystem {
     private static final double KF = 0.00;
 
     // This should be the maximum encoder extension of the arm(s)
-    private static final double MAX_HEIGHT = 2180;
+    private static final double MAX_HEIGHT = 2170;
 
     // Acceptable position error to be considered at target location
     private static final double TOLERANCE = 10.0;
     private static final double MAX_SPEED = 1;
+    public static final double HOLD_POWER = 0;
     private Boolean usePidf = false;
     private final MotorEx armRight;
     private final MotorEx armLeft;
@@ -44,9 +44,9 @@ public class ExtenderSubsystem extends StealthSubsystem {
     // PIDF to control arm movement keeps the arm from overshooting etc.
     private final PIDFController pidf = new PIDFController(KP, KI, KD, KF);
 
-    public ExtenderSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+    public ExtenderSubsystem(HardwareMap hardwareMap) {
 
-        this.telemetryA = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
         armRight = new MotorEx(hardwareMap, LEFT_ARM);
         armLeft = new MotorEx(hardwareMap, RIGHT_ARM);
         motors = new MotorGroup(armLeft, armRight);
@@ -75,8 +75,8 @@ public class ExtenderSubsystem extends StealthSubsystem {
             }
         }
 
-        telemetryA.addData("Extend Position:", getPosition());
-        telemetryA.addData("Extender RunTo:", usePidf);
+        telemetry.addData("Extend Position:", getPosition());
+        telemetry.addData("Extender RunTo:", usePidf);
     }
 
     /**

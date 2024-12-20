@@ -8,21 +8,21 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.ExtenderSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.LifterSubsystem;
 
 import java.util.function.DoubleSupplier;
 
 public class ExtenderDefaultCommand extends CommandBase {
 
     private final ExtenderSubsystem extender;
-    private final MultipleTelemetry telemetryA;
+
     private final DoubleSupplier extendAxis;
     private boolean manualControl = false;
-    private static final double axisDeadZone = 0.15;
+    private static final double axisDeadZone = 0.2;
 
-    public ExtenderDefaultCommand(ExtenderSubsystem extender, Telemetry telemetry, DoubleSupplier extendAxis) {
+    public ExtenderDefaultCommand(ExtenderSubsystem extender, DoubleSupplier extendAxis) {
         addRequirements(extender);
         this.extender = extender;
-        this.telemetryA = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         this.extendAxis = extendAxis;
     }
 
@@ -32,14 +32,15 @@ public class ExtenderDefaultCommand extends CommandBase {
         double power = extendAxis.getAsDouble();
 
         if(power > axisDeadZone || power < -axisDeadZone) {
+
             extender.stopRunTo();
             extender.getMotors().setRunMode(Motor.RunMode.RawPower);
             manualControl = true;
-            extender.setPower(power); //Manual control
-            telemetryA.addData("Manual Extend", power);
-        }else if (manualControl) {
+            extender.setPower(power);
 
-            extender.setPower(0);
+        }else if (manualControl) {
+            // holds the lift here
+            extender.setPower(ExtenderSubsystem.HOLD_POWER);
             manualControl = false;
         }
     }

@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.teamcode.pedroPathing.tuning.FollowerConstan
 import static org.firstinspires.ftc.teamcode.pedroPathing.tuning.FollowerConstants.leftRearMotorName;
 import static org.firstinspires.ftc.teamcode.pedroPathing.tuning.FollowerConstants.rightFrontMotorName;
 import static org.firstinspires.ftc.teamcode.pedroPathing.tuning.FollowerConstants.rightRearMotorName;
+import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -31,7 +32,6 @@ import org.stealthrobotics.library.StealthSubsystem;
  */
 public class FollowerSubsystem extends StealthSubsystem {
     private final Follower follower;
-    private final Telemetry telemetryA;
 
     /**
      * Used for rotational movement when providing a heading to the robot.
@@ -48,10 +48,10 @@ public class FollowerSubsystem extends StealthSubsystem {
     // Maximum power to use to rotate the robot in place.
     private static final double MAX_ROTATION_POWER = 0.8;
 
-    public FollowerSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+    public FollowerSubsystem(HardwareMap hardwareMap) {
         follower = new Follower(hardwareMap);
         follower.initialize();
-        this.telemetryA = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
         hardwareMap.get(DcMotorEx.class, leftFrontMotorName).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         hardwareMap.get(DcMotorEx.class, leftRearMotorName).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         hardwareMap.get(DcMotorEx.class, rightRearMotorName).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -77,9 +77,9 @@ public class FollowerSubsystem extends StealthSubsystem {
     public void periodic() {
         this.getFollower().update();
         Pose curPos = this.getFollower().getPose();
-        telemetryA.addData("IMU X", curPos.getX());
-        telemetryA.addData("IMU Y", curPos.getY());
-        telemetryA.addData("IMU Heading:", Math.toDegrees(curPos.getHeading()));
+        telemetry.addData("IMU X", curPos.getX());
+        telemetry.addData("IMU Y", curPos.getY());
+        telemetry.addData("IMU Heading:", Math.toDegrees(curPos.getHeading()));
     }
 
 
@@ -105,7 +105,7 @@ public class FollowerSubsystem extends StealthSubsystem {
 
             if (follower.isBusy())
             {
-                telemetryA.addLine("Follower is busy");
+                telemetry.addLine("Follower is busy");
                 follower.breakFollowing();
             }
 
@@ -132,20 +132,20 @@ public class FollowerSubsystem extends StealthSubsystem {
 
         headingTrackPidf.setSetPoint(0);
         double output = headingTrackPidf.calculate(headingDelta);
-        telemetryA.addData("PIDF Power", output);
+        telemetry.addData("PIDF Power", output);
 
         // Check if the difference is within the tolerance
         if (!headingTrackPidf.atSetPoint()) {
             double scaledOutput = Math.max(Math.abs(output), MIN_ROTATION_POWER) * Math.signum(output);
             scaledOutput = MathFunctions.clamp(scaledOutput, -MAX_ROTATION_POWER, MAX_ROTATION_POWER);
-            telemetryA.addData("Scaled Power", scaledOutput);
+            telemetry.addData("Scaled Power", scaledOutput);
 
             follower.setTeleOpMovementVectors(0, 0, scaledOutput);
             follower.update();
             return false;
         }
 
-        telemetryA.addLine("At Set Point");
+        telemetry.addLine("At Set Point");
         follower.setTeleOpMovementVectors(0, 0, 0);
         follower.update();
 

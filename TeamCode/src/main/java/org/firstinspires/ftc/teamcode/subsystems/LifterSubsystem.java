@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
@@ -34,12 +37,10 @@ public class LifterSubsystem extends StealthSubsystem {
     private final MotorGroup motors;
     private final MotorEx leftElevator;
     private final MotorEx rightElevator;
-    private final Telemetry telemetryA;
     private Boolean usingPidf = false;
 
-    public LifterSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+    public LifterSubsystem(HardwareMap hardwareMap) {
 
-        this.telemetryA = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         leftElevator = new MotorEx(hardwareMap, LEFT_ELEVATOR);
         rightElevator = new MotorEx(hardwareMap, RIGHT_ELEVATOR);
         rightElevator.setInverted(true);
@@ -58,17 +59,17 @@ public class LifterSubsystem extends StealthSubsystem {
     public void periodic() {
         if (usingPidf) {
             double power = pidf.calculate(getPosition());
-            motors.set(power * -MAX_SPEED);
+            motors.set(power * MAX_SPEED);
 
-//            if (pidf.atSetPoint()) {
-//                motors.set(HOLD_POWER);
-//                usingPidf = false;
-//            }
+            if (pidf.atSetPoint()) {
+                setPower(HOLD_POWER);
+                usingPidf = false;
+            }
         }
 
-        telemetryA.addData("Left Position:", leftElevator.getCurrentPosition());
-        telemetryA.addData("Right Position:", rightElevator.getCurrentPosition());
-        telemetryA.addData("usingPidf:", usingPidf);
+        telemetry.addData("Left Position:", leftElevator.getCurrentPosition());
+        telemetry.addData("Right Position:", rightElevator.getCurrentPosition());
+        telemetry.addData("usingPidf:", usingPidf);
     }
 
     /**
@@ -77,7 +78,8 @@ public class LifterSubsystem extends StealthSubsystem {
      * @return A Command that can be run
      */
     public Command startSetPositionCommand(double position) {
-        return this.runOnce(()-> setPosition(position));
+        return new InstantCommand(()->setPosition(position));
+        //return runOnce(()-> setPosition(position));
     }
 
     /**
@@ -104,8 +106,8 @@ public class LifterSubsystem extends StealthSubsystem {
      * @param position position in % of max range
      */
     public void setPosition(double position) {
-        pidf.setSetPoint(position * MAX_HEIGHT);
         usingPidf = true;
+        pidf.setSetPoint(position * MAX_HEIGHT);
     }
 
 
