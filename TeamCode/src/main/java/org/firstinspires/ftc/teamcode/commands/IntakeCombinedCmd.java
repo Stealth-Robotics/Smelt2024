@@ -33,6 +33,10 @@ public class IntakeCombinedCmd extends CommandBase {
 
     private boolean initState = false;
 
+    private boolean wristExtended = false;
+    private long lastSystemTime = 0;
+    private static final long EXTEND_TIME = 500;
+
     public IntakeCombinedCmd(
             IntakeElbowSubsystem intakeElbow,
             IntakeWristSubsystem intakeWrist,
@@ -61,7 +65,7 @@ public class IntakeCombinedCmd extends CommandBase {
     public void execute(){
         if (!initState) {
          clips.setClose();
-         intakeElbow.setUp();
+         intakeElbow.setMiddlePose();
          intakeWrist.setStartPosition();
          initState = true;
 
@@ -72,7 +76,14 @@ public class IntakeCombinedCmd extends CommandBase {
         }
         else if(retractIntake.getAsBoolean()) {
             retractIntake().schedule();
+        }else if (intakeElbow.getState().equals(IntakeElbowSubsystem.ElbowState.PICKUP_POSITION)) {
+            long currentTime = System.currentTimeMillis();
+            if (currentTime > lastSystemTime + EXTEND_TIME) {
+                intakeWrist.setToggleCmd().schedule();
+                lastSystemTime = currentTime;
+            }
         }
+
     }
 
     private ParallelCommandGroup deployIntake(){

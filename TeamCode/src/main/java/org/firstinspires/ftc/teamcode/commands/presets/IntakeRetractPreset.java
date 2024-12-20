@@ -16,7 +16,7 @@ public class IntakeRetractPreset extends SequentialCommandGroup {
 
         addCommands(
                 intake.setIntakeCmd(),
-                intakeElbow.setUpCmd(),
+                intakeElbow.setMiddleCmd(),
                 intakeWrist.setStartPositionCmd(),
                 new WaitCommand(500),
                 extender.setPositionCommand(.001, 2000),

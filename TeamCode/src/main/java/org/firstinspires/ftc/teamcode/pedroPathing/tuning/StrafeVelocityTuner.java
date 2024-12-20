@@ -148,6 +148,8 @@ public class StrafeVelocityTuner extends OpMode {
             average /= (double) velocities.size();
 
             telemetryA.addData("strafe velocity:", average);
+            telemetryA.addData("Pose X", poseUpdater.getPose().getX());
+            telemetryA.addData("Pose Y", poseUpdater.getPose().getY());
             telemetryA.update();
         }
     }

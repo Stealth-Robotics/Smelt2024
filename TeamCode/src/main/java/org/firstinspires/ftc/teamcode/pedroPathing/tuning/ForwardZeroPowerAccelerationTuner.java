@@ -156,6 +156,10 @@ public class ForwardZeroPowerAccelerationTuner extends OpMode {
             average /= (double) accelerations.size();
 
             telemetryA.addData("forward zero power acceleration (deceleration):", average);
+            telemetryA.addData("Pose X", poseUpdater.getPose().getX());
+            telemetryA.addData("Pose Y", poseUpdater.getPose().getY());
+            telemetryA.addData("Pose Heading", Math.toDegrees(poseUpdater.getPose().getHeading()));
+
             telemetryA.update();
         }
     }

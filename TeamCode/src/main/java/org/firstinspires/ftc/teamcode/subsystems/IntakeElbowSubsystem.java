@@ -13,18 +13,39 @@ import org.stealthrobotics.library.StealthSubsystem;
 //rightintakepickup pos: 0.21
 //rightintake middle pos: 0.5
 
+// UP OUt of way
+// Left .38 Right .80
+
 public class IntakeElbowSubsystem extends StealthSubsystem {
+
+    public enum ElbowState {
+        DUMP_POSITION,
+        UP_POSITION,
+        MIDDLE_POSITION,
+        PICKUP_POSITION,
+        UNKNOWN_POSITION
+    }
+
     private static final String INTAKE_ELBOW_LEFT_NAME = "leftintakeelbow";
     private static final String INTAKE_ELBOW_RIGHT_NAME = "rightintakeelbow";
-    private static final double LEFT_INTAKE_DUMP_POS = 0.036;
-    private static final double LEFT_INTAKE_PICKUP_POS = 0.816;
-    private static final double LEFT_INTAKE_UP_POS = 0.49;
+
     private static final double RIGHT_INTAKE_DUMP_POS = 0.982;
-    private static final double RIGHT_INTAKE_PICKUP_POS = 0.21;
+    private static final double LEFT_INTAKE_DUMP_POS = 0.036;
+
     private static final double RIGHT_INTAKE_MIDDLE_POS = 0.5;
+    private static final double LEFT_INTAKE_MIDDLE_POS = 0.49;
+
+    private static final double RIGHT_INTAKE_PICKUP_POS = .25;
+    private static final double LEFT_INTAKE_PICKUP_POS = .95;
+
+    private static final double RIGHT_INTAKE_UP_POS = 0.73;
+    private static final double LEFT_INTAKE_UP_POS = 0.45;
+
     private final Servo intakeElbowLeft;
     private final Servo intakeElbowRight;
     private boolean isStartPosition = false;
+
+    private ElbowState state = ElbowState.UNKNOWN_POSITION;
 
     public IntakeElbowSubsystem(HardwareMap hardwareMap){
         intakeElbowLeft = hardwareMap.get(Servo.class, INTAKE_ELBOW_LEFT_NAME);
@@ -34,37 +55,56 @@ public class IntakeElbowSubsystem extends StealthSubsystem {
     @Override
     public void periodic() {
         if (isStartPosition) {
-            setUp();
+            setUpPose();
             isStartPosition = true;
         }
     }
-    public void setDump()
+    public void setDumpPose()
     {
+        state = ElbowState.DUMP_POSITION;
         intakeElbowLeft.setPosition(LEFT_INTAKE_DUMP_POS);
         intakeElbowRight.setPosition(RIGHT_INTAKE_DUMP_POS);
     }
 
-    public void setPickup()
+    public ElbowState getState() {
+        return state;
+    }
+
+    public void setPickupPose()
     {
+        state = ElbowState.PICKUP_POSITION;
         intakeElbowLeft.setPosition(LEFT_INTAKE_PICKUP_POS);
         intakeElbowRight.setPosition(RIGHT_INTAKE_PICKUP_POS);
     }
 
-    public void setUp() {
-        intakeElbowLeft.setPosition(LEFT_INTAKE_UP_POS);
+    public void setMiddlePose() {
+        state = ElbowState.MIDDLE_POSITION;
+        intakeElbowLeft.setPosition(LEFT_INTAKE_MIDDLE_POS);
         intakeElbowRight.setPosition(RIGHT_INTAKE_MIDDLE_POS);
     }
 
+    public void setUpPose() {
+        state = ElbowState.UP_POSITION;
+        intakeElbowLeft.setPosition(LEFT_INTAKE_UP_POS);
+        intakeElbowRight.setPosition(RIGHT_INTAKE_UP_POS);
+    }
+
     public Command setDumpCmd(){
-        return runOnce(this::setDump);
+        return runOnce(this::setDumpPose);
     }
 
     public Command setPickupCmd(){
-        return runOnce(this::setPickup);
+        return runOnce(this::setPickupPose);
+    }
+
+    public Command setMiddleCmd() {
+        return runOnce(this::setMiddlePose);
     }
 
     public Command setUpCmd() {
-        return runOnce(this::setUp);
+        return runOnce(this::setUpPose);
     }
+
+
 
 }

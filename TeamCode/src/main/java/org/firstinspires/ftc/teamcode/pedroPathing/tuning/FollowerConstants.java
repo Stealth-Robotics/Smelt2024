@@ -30,8 +30,8 @@ public class FollowerConstants {
 
     // This section is for setting the actual drive vector for the front left wheel, if the robot
     // is facing a heading of 0 radians with the wheel centered at (0,0)
-    private static final double xMovement = 63.8141; // 63.8141; MID //66.972 FULL// 60 DIST
-    private static final double yMovement = 51.4299; // MID 51.4299; // 55.5728; FULL //60 dst
+    private static final double xMovement = 70.0; // 63.8141; MID //66.972 FULL// 60 DIST
+    private static final double yMovement = 41.8; // MID 51.4299; // 55.5728; FULL //60 dst
     private static double[] convertToPolar = Point.cartesianToPolar(xMovement, -yMovement);
     public static Vector frontLeftVector = MathFunctions.normalizeVector(new Vector(convertToPolar[0], convertToPolar[1]));
 
@@ -92,11 +92,11 @@ public class FollowerConstants {
     // Acceleration of the drivetrain when power is cut in inches/second^2 (should be negative)
     // if not negative, then the robot thinks that its going to go faster under 0 power
     // The smaller (negative) the number the further the robot will travel under 0 power
-    public static double forwardZeroPowerAcceleration = -15; // -38.7776 LOW // -51.637 FULL;
+    public static double forwardZeroPowerAcceleration = -43.8; // -38.7776 LOW // -51.637 FULL;
 
     // Acceleration of the drivetrain when power is cut in inches/second^2 (should be negative)
     // if not negative, then the robot thinks that its going to go faster under 0 power
-    public static double lateralZeroPowerAcceleration = -40; // 90.7 FULL
+    public static double lateralZeroPowerAcceleration = -102; // 90.7 FULL
 
     // A multiplier for the zero power acceleration to change the speed the robot decelerates at
     // the end of paths.
