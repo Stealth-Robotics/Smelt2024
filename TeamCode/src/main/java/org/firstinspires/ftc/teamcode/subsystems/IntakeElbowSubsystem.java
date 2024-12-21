@@ -35,8 +35,8 @@ public class IntakeElbowSubsystem extends StealthSubsystem {
     private static final double RIGHT_INTAKE_MIDDLE_POS = 0.5;
     private static final double LEFT_INTAKE_MIDDLE_POS = 0.49;
 
-    private static final double RIGHT_INTAKE_PICKUP_POS = .25;
-    private static final double LEFT_INTAKE_PICKUP_POS = .95;
+    private static final double RIGHT_INTAKE_PICKUP_POS = .27;
+    private static final double LEFT_INTAKE_PICKUP_POS = .93;
 
     private static final double RIGHT_INTAKE_UP_POS = 0.73;
     private static final double LEFT_INTAKE_UP_POS = 0.45;

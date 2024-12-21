@@ -72,8 +72,8 @@ public class TeleStealth extends StealthOpMode {
         FollowerCommand cmd = new FollowerCommand(
                 fss,
                 telemetry,
-                () -> driver.getLeftY(),
-                () -> -driver.getLeftX(),
+                () -> -driver.getLeftY(),
+                () -> driver.getLeftX(),
                 () -> (driver.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) - driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)),
                 () -> driver.getGamepadButton(GamepadKeys.Button.A).get());
         fss.setDefaultCommand(cmd);
@@ -121,7 +121,7 @@ public class TeleStealth extends StealthOpMode {
 
         operator.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(clips.setOpenCmd());
         operator.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(clips.setCloseCmd());
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(lifter.startSetPositionCommand(.95));
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(lifter.startSetPositionCommand(1));
         operator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(lifter.startSetPositionCommand(.001));
         operator.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(wrist.setStartPositionCmd());
         operator.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(clips.toggleCmd());

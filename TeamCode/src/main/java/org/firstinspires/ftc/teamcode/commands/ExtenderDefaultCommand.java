@@ -7,6 +7,7 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.MathFunctions;
 import org.firstinspires.ftc.teamcode.subsystems.ExtenderSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LifterSubsystem;
 
@@ -18,7 +19,7 @@ public class ExtenderDefaultCommand extends CommandBase {
 
     private final DoubleSupplier extendAxis;
     private boolean manualControl = false;
-    private static final double axisDeadZone = 0.2;
+    private static final double axisDeadZone = 0.3;
 
     public ExtenderDefaultCommand(ExtenderSubsystem extender, DoubleSupplier extendAxis) {
         addRequirements(extender);
@@ -30,7 +31,7 @@ public class ExtenderDefaultCommand extends CommandBase {
     public void execute() {
 
         double power = extendAxis.getAsDouble();
-
+        power = MathFunctions.clamp(power, -1, 1);
         if(power > axisDeadZone || power < -axisDeadZone) {
 
             extender.stopRunTo();

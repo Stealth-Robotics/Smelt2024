@@ -38,9 +38,9 @@ public class OutputCombinedCmd extends CommandBase {
             OutputLiftSubsystem outputLiftSubsystem,
             LifterSubsystem lifterSubsystem,
             ClipsSubsystem clipsSubsystem,
-            BooleanSupplier grabSpecimen,
-            BooleanSupplier dumpBucket,
             BooleanSupplier intakeReadyBucket,
+            BooleanSupplier dumpBucket,
+            BooleanSupplier grabSpecimen,
             BooleanSupplier placeSpecimen) {
 
         addRequirements(outputLiftSubsystem);
@@ -60,7 +60,10 @@ public class OutputCombinedCmd extends CommandBase {
     @Override
     public void execute() {
         telemetry.addData("OutputCombinedCmd State", outputLift.getState());
-
+        if (outputLift.getState().equals(OutputLiftSubsystem.LiftState.UNKNOWN_POSITION))
+        {
+            setIntakeReadyBucket().schedule();
+        }
         if (grabSpecimen.getAsBoolean()) {
             getSpecimenGrabCmd().schedule();
         }
@@ -92,6 +95,7 @@ public class OutputCombinedCmd extends CommandBase {
                 break;
 
             case DUMP_BUCKET:
+                cmd.addCommands(unDumpBucket());
                 cmd.addCommands(
                         lifter.startSetPositionCommand(LIFTER_INTAKE_POSITION),
                         clips.setCloseCmd(),
@@ -113,6 +117,14 @@ public class OutputCombinedCmd extends CommandBase {
         }
 
         return cmd;
+    }
+
+    public SequentialCommandGroup unDumpBucket() {
+        return new SequentialCommandGroup(
+                outputRotate.setIntakeReadyCmd(),
+                new WaitCommand(100),
+                outputLift.setDownCmd(),
+                new WaitCommand(100));
     }
 
     public SequentialCommandGroup setDumpBucket(){
@@ -141,36 +153,56 @@ public class OutputCombinedCmd extends CommandBase {
 
     public SequentialCommandGroup getSpecimenPlaceCmd() {
 
-        if (outputLift.getState().equals(OutputLiftSubsystem.LiftState.CLIP_SCORE)) {
-            return getScoreClipCmd();
+        SequentialCommandGroup cmd = new SequentialCommandGroup();
+        switch (outputLift.getState()){
+            case CLIP_SCORE:
+                cmd.addCommands(getScoreClipCmd());
+                break;
+            case DUMP_BUCKET:
+                cmd.addCommands(unDumpBucket());
+            case CLIP_GRAB:
+            case INTAKE_READY_BUCKET:
+            default:
+                cmd.addCommands(clips.setCloseCmd(),
+                        new WaitCommand(300),
+                        lifter.startSetPositionCommand(LIFTER_SCORE_POSITION),
+                        new WaitCommand(ROTATE_DELAY),
+                        outputLift.setClipScoreCmd(),
+                        outputRotate.setClipCmd());
+
         }
 
-        return new SequentialCommandGroup(
-                clips.setCloseCmd(),
-                new WaitCommand(300),
-                lifter.startSetPositionCommand(LIFTER_SCORE_POSITION),
-                new WaitCommand(ROTATE_DELAY),
-                outputLift.setClipScoreCmd(),
-                outputRotate.setClipCmd());
-
+        return cmd;
     }
 
     public SequentialCommandGroup setIntakeReadyBucket() {
+        SequentialCommandGroup cmd = new SequentialCommandGroup();
+        switch (outputLift.getState()) {
+            case CLIP_SCORE:
+                cmd.addCommands(getScoreClipCmd());
+                break;
+            case DUMP_BUCKET:
+                cmd.addCommands(unDumpBucket());
+            case CLIP_GRAB:
+            case INTAKE_READY_BUCKET:
+            default:
+                cmd.addCommands(
+                        lifter.startSetPositionCommand(LIFTER_INTAKE_POSITION),
+                        clips.setCloseCmd(),
+                        outputRotate.setIntakeReadyCmd(),
+                        new WaitCommand(ROTATE_DELAY),
+                        outputLift.setDownCmd());
+        }
 
-        return new SequentialCommandGroup(
-                lifter.startSetPositionCommand(LIFTER_INTAKE_POSITION),
-                clips.setCloseCmd(),
-                outputRotate.setIntakeReadyCmd(),
-                new WaitCommand(ROTATE_DELAY),
-                outputLift.setDownCmd());
+        return cmd;
     }
 
     private SequentialCommandGroup getScoreClipCmd()
     {
         return new SequentialCommandGroup(
-                lifter.startSetPositionCommand(LIFTER_SCORE_POSITION * 0.75),
-                new WaitCommand(100),
-                clips.setOpenCmd());
+                        lifter.startSetPositionCommand(LIFTER_SCORE_POSITION * .5),
+                        new WaitCommand(100),
+                        clips.setOpenCmd());
     }
 
 }

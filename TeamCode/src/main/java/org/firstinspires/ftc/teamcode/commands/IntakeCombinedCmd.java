@@ -35,7 +35,7 @@ public class IntakeCombinedCmd extends CommandBase {
 
     private boolean wristExtended = false;
     private long lastSystemTime = 0;
-    private static final long EXTEND_TIME = 500;
+    private static final long EXTEND_TIME = 1000;
 
     public IntakeCombinedCmd(
             IntakeElbowSubsystem intakeElbow,

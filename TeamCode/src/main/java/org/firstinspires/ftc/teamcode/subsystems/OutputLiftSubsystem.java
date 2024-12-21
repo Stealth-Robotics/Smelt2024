@@ -21,9 +21,10 @@ public class OutputLiftSubsystem extends StealthSubsystem {
         CLIP_GRAB,
         DUMP_BUCKET,
         CLIP_SCORE,
-        MAX_POSITION;
+        MAX_POSITION,
+        UNKNOWN_POSITION;
 
-        private static LiftState state = LiftState.INTAKE_READY_BUCKET;
+        private static LiftState state = LiftState.UNKNOWN_POSITION;
 
         public static LiftState get() {
             return state;

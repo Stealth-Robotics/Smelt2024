@@ -8,15 +8,18 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Paths.BucketScorePath;
+import org.firstinspires.ftc.teamcode.commands.OutputCombinedCmd;
+import org.firstinspires.ftc.teamcode.commands.presets.OutputBucketScorePreset;
+import org.firstinspires.ftc.teamcode.commands.presets.OutputUnDumpPreset;
 import org.firstinspires.ftc.teamcode.common.StealthAutoMode;
 import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
 
-@Disabled
-@Autonomous(name = "Blue pathing example", group = "examples")
-public class PathExampleAuto extends StealthAutoMode {
+
+@Autonomous(name = "AutoBucket Score", group = "Blue")
+public class AutoBucketScore extends StealthAutoMode {
 
 
-   private BucketScorePath path;
+    private BucketScorePath path;
 
     /**
      * Override this to setup your hardware, commands, button bindings, etc.
@@ -28,6 +31,10 @@ public class PathExampleAuto extends StealthAutoMode {
         telemetry.addLine("Example path of using the follower");
         path = new BucketScorePath();
         commandGroup.addCommands(initPath(), runPath());
+        intakeElbowSubsystem.setUpPose();
+        intakeWristSubsystem.setStartPosition();
+
+
     }
 
     @Override
@@ -39,11 +46,7 @@ public class PathExampleAuto extends StealthAutoMode {
         return new InstantCommand(()->
         {
             Follower follower = followerSubsystem.getFollower();
-            if (avgPose != null) {
-                path.setStartPose(avgPose);
-            } else if (lastPose != null) {
-                path.setStartPose(lastPose);
-            }
+
             follower.setStartingPose(path.getStartPose());
             follower.update();
         });
@@ -54,13 +57,16 @@ public class PathExampleAuto extends StealthAutoMode {
         Follower follower = followerSubsystem.getFollower();
 
         return new SequentialCommandGroup(
+                lifterSubsystem.startSetPositionCommand(.99),
                 new InstantCommand(() ->follower.followPath(path.getNextSegment())),
-                new WaitCommand(1000),
-                setBothArms(.99),
-                new WaitCommand(500),
-                new InstantCommand(() ->follower.followPath(path.getNextSegment())),
-                new WaitCommand(1000),
-                setBothArms(.01)
+
+                lifterSubsystem.endSetPositionCommand(2000),
+                new OutputBucketScorePreset(outputRotationSubsystem, outputLiftSubsystem),
+                new WaitCommand(2000),
+                new OutputUnDumpPreset(outputRotationSubsystem, outputLiftSubsystem),
+                new WaitCommand(200),
+                lifterSubsystem.startSetPositionCommand(.001)
+
         );
     }
 
