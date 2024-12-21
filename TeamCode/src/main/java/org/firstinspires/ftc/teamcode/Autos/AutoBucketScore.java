@@ -65,7 +65,7 @@ public class AutoBucketScore extends StealthAutoMode {
                 new WaitCommand(2000),
                 new OutputUnDumpPreset(outputRotationSubsystem, outputLiftSubsystem),
                 new WaitCommand(200),
-                lifterSubsystem.startSetPositionCommand(.001)
+                lifterSubsystem.startSetPositionCommand(.0001)
 
         );
     }
