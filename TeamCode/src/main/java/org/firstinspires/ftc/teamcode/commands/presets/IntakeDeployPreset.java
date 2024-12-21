@@ -15,13 +15,13 @@ public class IntakeDeployPreset extends SequentialCommandGroup {
     public IntakeDeployPreset(ExtenderSubsystem extender, IntakeElbowSubsystem intakeElbow, IntakeWristSubsystem intakeWrist, IntakeSubsystem intake){
 
         addCommands(
-                intakeElbow.setMiddleCmd(),
+                //intakeElbow.setMiddleCmd(),
                 intakeWrist.setStartPositionCmd(),
-                new WaitCommand(50),
-                extender.startSetPositionCommand(.98),
-                new WaitCommand(500),
+                //new WaitCommand(50),
+                //extender.startSetPositionCommand(.98),
+                //new WaitCommand(500),
                 intake.setIntakeCmd(),
-                extender.endSetPositionCommand(500),
+                //extender.endSetPositionCommand(500),
                 intakeElbow.setPickupCmd());
     }
 }

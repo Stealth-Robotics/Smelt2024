@@ -68,32 +68,44 @@ public class IntakeCombinedCmd extends CommandBase {
          intakeElbow.setMiddlePose();
          intakeWrist.setStartPosition();
          initState = true;
-
         }
 
         if(deployIntake.getAsBoolean()){
-            deployIntake().schedule();
+            if (intakeElbow.getState() == IntakeElbowSubsystem.ElbowState.PICKUP_POSITION)
+            {
+                setElbowMiddle().schedule();
+            }else {
+                deployIntake().schedule();
+            }
         }
         else if(retractIntake.getAsBoolean()) {
             retractIntake().schedule();
-        }else if (intakeElbow.getState().equals(IntakeElbowSubsystem.ElbowState.PICKUP_POSITION)) {
-            long currentTime = System.currentTimeMillis();
-            if (currentTime > lastSystemTime + EXTEND_TIME) {
-                intakeWrist.setToggleCmd().schedule();
-                lastSystemTime = currentTime;
-            }
         }
+//        else if (intakeElbow.getState().equals(IntakeElbowSubsystem.ElbowState.PICKUP_POSITION)) {
+//            long currentTime = System.currentTimeMillis();
+//            if (currentTime > lastSystemTime + EXTEND_TIME) {
+//                intakeWrist.setToggleCmd().schedule();
+//                lastSystemTime = currentTime;
+//            }
+        //}
 
+    }
+
+    private ParallelCommandGroup setElbowMiddle()
+    {
+        return new ParallelCommandGroup(
+                intakeElbow.setMiddleCmd()
+        );
     }
 
     private ParallelCommandGroup deployIntake(){
         ParallelCommandGroup cmd = new ParallelCommandGroup();
         cmd.addCommands(
                 new IntakeDeployPreset(extender, intakeElbow, intakeWrist, intake));
-        if (outputLift.getState() != OutputLiftSubsystem.LiftState.INTAKE_READY_BUCKET ||
-            lifter.getPosition() > 20) {
-            cmd.addCommands(new OutputReadyPreset(outputRotation, outputLift, lifter, clips));
-        }
+//        if (outputLift.getState() != OutputLiftSubsystem.LiftState.INTAKE_READY_BUCKET ||
+//            lifter.getPosition() > 20) {
+//            cmd.addCommands(new OutputReadyPreset(outputRotation, outputLift, lifter, clips));
+//        }
         return cmd;
     }
 

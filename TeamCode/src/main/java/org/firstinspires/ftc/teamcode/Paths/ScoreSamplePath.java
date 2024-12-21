@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.Point;
 import org.firstinspires.ftc.teamcode.pedroPathing.tuning.FollowerConstants;
 import org.stealthrobotics.library.Alliance;
 
-public class PushSamplesPath extends PathManager {
+public class ScoreSamplePath extends PathManager {
 
     private static final Pose DEFAULT_START_POINT_BLUE = new Pose(
             8.25, 48, Math.toRadians(270));
@@ -22,7 +22,7 @@ public class PushSamplesPath extends PathManager {
      * Sample path using Bezier curves.
      *
      */
-    public PushSamplesPath() {
+    public ScoreSamplePath() {
         super(DEFAULT_START_POINT_BLUE);
 
         this.bluePathChain = buildBluePathChain();

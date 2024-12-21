@@ -15,13 +15,13 @@ public class IntakeRetractPreset extends SequentialCommandGroup {
     public IntakeRetractPreset(ExtenderSubsystem extender, IntakeElbowSubsystem intakeElbow, IntakeWristSubsystem intakeWrist, IntakeSubsystem intake){
 
         addCommands(
-                intake.setIntakeCmd(),
-                intakeElbow.setMiddleCmd(),
+               intake.setIntakeCmd(),
+                //intakeElbow.setMiddleCmd(),
                 intakeWrist.setStartPositionCmd(),
-                new WaitCommand(500),
-                extender.setPositionCommand(.001, 2000),
+                //new WaitCommand(500),
+                //extender.setPositionCommand(.001, 2000),
                 intakeElbow.setDumpCmd(),
-                new WaitCommand(500),
+                new WaitCommand(2000),
                 intake.setOuttakeCmd(),
                 new WaitCommand(1000),
                 intakeElbow.setUpCmd(),

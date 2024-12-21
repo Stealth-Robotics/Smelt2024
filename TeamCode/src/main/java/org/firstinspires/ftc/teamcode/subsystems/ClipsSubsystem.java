@@ -14,9 +14,9 @@ import org.stealthrobotics.library.StealthSubsystem;
 
 public class ClipsSubsystem extends StealthSubsystem {
     private static final String CLIP_NAME = "clips";
-    private static final double CLIP_OPEN = 0.55;
-    private static final double CLIP_CLOSE = 0.395;
-    private static final double CLIP_FULL_OPEN = 0.64;
+    private static final double CLIP_OPEN = 0.65;
+    private static final double CLIP_CLOSE = 0.399;
+    private static final double CLIP_FULL_OPEN = 0.74;
 
     private static Boolean toggleClosed = false;
 
@@ -39,7 +39,7 @@ public class ClipsSubsystem extends StealthSubsystem {
 
     public void setOpen(){
         toggleClosed = false;
-        clips.setPosition(CLIP_OPEN);}
+        clips.setPosition(CLIP_FULL_OPEN);}
     public void setClose(){
         toggleClosed = true;
         clips.setPosition(CLIP_CLOSE);

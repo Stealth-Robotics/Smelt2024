@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.commands;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
 import com.arcrobotics.ftclib.command.CommandBase;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import org.firstinspires.ftc.teamcode.subsystems.ClipsSubsystem;
@@ -17,13 +18,24 @@ import java.util.function.BooleanSupplier;
  */
 public class OutputCombinedCmd extends CommandBase {
 
+    private enum OutputState
+    {
+        OUTPUT_START,
+        INTAKE_READY_BUCKET,
+        CLIP_GRAB,
+        DUMP_BUCKET,
+        CLIP_SCORE,
+        CLIP_SCORED,
+        MAX_POSITION,
+        UNKNOWN_POSITION;
+    }
     protected OutputRotationSubsystem outputRotate;
     protected final OutputLiftSubsystem outputLift;
     protected final ClipsSubsystem clips;
     protected final LifterSubsystem lifter;
 
     protected static final long ROTATE_DELAY = 500;
-    protected static final double LIFTER_SCORE_POSITION = .45;
+    protected static final double LIFTER_SCORE_POSITION = .55;
     protected static final double LIFTER_DUMP_POSITION = .99;
     protected static final double LIFTER_INTAKE_POSITION = .001;
 
@@ -32,6 +44,7 @@ public class OutputCombinedCmd extends CommandBase {
     private final BooleanSupplier dumpBucket;
     private final BooleanSupplier intakeReadyBucket;
 
+    private OutputState state = OutputState.UNKNOWN_POSITION;
 
     public OutputCombinedCmd(
             OutputRotationSubsystem outputRotationSubsystem,
@@ -60,28 +73,33 @@ public class OutputCombinedCmd extends CommandBase {
     @Override
     public void execute() {
         telemetry.addData("OutputCombinedCmd State", outputLift.getState());
-        if (outputLift.getState().equals(OutputLiftSubsystem.LiftState.UNKNOWN_POSITION))
+        if (state.equals(OutputState.UNKNOWN_POSITION))
         {
-            setIntakeReadyBucket().schedule();
+            setIntakeStart().schedule();
+            state = OutputState.OUTPUT_START;
         }
         if (grabSpecimen.getAsBoolean()) {
             getSpecimenGrabCmd().schedule();
+            state = OutputState.CLIP_GRAB;
         }
         else if (placeSpecimen.getAsBoolean()) {
             getSpecimenPlaceCmd().schedule();
+            state = OutputState.CLIP_SCORE;
         }
         else if (dumpBucket.getAsBoolean()) {
             setDumpBucket().schedule();
+            state = OutputState.DUMP_BUCKET;
         }
         else if (intakeReadyBucket.getAsBoolean()) {
             setIntakeReadyBucket().schedule();
+            state = OutputState.INTAKE_READY_BUCKET;
         }
 
     }
 
     public SequentialCommandGroup getSpecimenGrabCmd() {
         SequentialCommandGroup cmd = new SequentialCommandGroup();
-        switch (outputLift.getState()) {
+        switch (state) {
             case INTAKE_READY_BUCKET:
                 if (lifter.getPosition() > 10) {
                     cmd.addCommands(lifter.startSetPositionCommand(LIFTER_INTAKE_POSITION));
@@ -105,7 +123,7 @@ public class OutputCombinedCmd extends CommandBase {
                 break;
 
             case CLIP_SCORE:
-                cmd.addCommands(getScoreClipCmd());
+                cmd.addCommands(setScoreSpecimenCmd());
 
             default:
                 cmd.addCommands(
@@ -130,7 +148,7 @@ public class OutputCombinedCmd extends CommandBase {
     public SequentialCommandGroup setDumpBucket(){
 
         SequentialCommandGroup cmd = new SequentialCommandGroup();
-        switch (outputLift.getState()) {
+        switch (state) {
             case INTAKE_READY_BUCKET:
                 cmd.addCommands(
                         clips.setCloseCmd(),
@@ -154,9 +172,9 @@ public class OutputCombinedCmd extends CommandBase {
     public SequentialCommandGroup getSpecimenPlaceCmd() {
 
         SequentialCommandGroup cmd = new SequentialCommandGroup();
-        switch (outputLift.getState()){
+        switch (state){
             case CLIP_SCORE:
-                cmd.addCommands(getScoreClipCmd());
+                cmd.addCommands(setScoreSpecimenCmd());
                 break;
             case DUMP_BUCKET:
                 cmd.addCommands(unDumpBucket());
@@ -168,18 +186,25 @@ public class OutputCombinedCmd extends CommandBase {
                         lifter.startSetPositionCommand(LIFTER_SCORE_POSITION),
                         new WaitCommand(ROTATE_DELAY),
                         outputLift.setClipScoreCmd(),
-                        outputRotate.setClipCmd());
+                        outputRotate.setScorePoseCmd());
 
         }
 
         return cmd;
     }
 
+    public ParallelCommandGroup setIntakeStart() {
+        return new ParallelCommandGroup(
+                lifter.startSetPositionCommand(LIFTER_INTAKE_POSITION),
+                clips.setCloseCmd(),
+                new WaitCommand(ROTATE_DELAY),
+                outputLift.setDownCmd());
+    }
     public SequentialCommandGroup setIntakeReadyBucket() {
         SequentialCommandGroup cmd = new SequentialCommandGroup();
-        switch (outputLift.getState()) {
+        switch (state) {
             case CLIP_SCORE:
-                cmd.addCommands(getScoreClipCmd());
+                cmd.addCommands(setScoreSpecimenCmd());
                 break;
             case DUMP_BUCKET:
                 cmd.addCommands(unDumpBucket());
@@ -197,9 +222,11 @@ public class OutputCombinedCmd extends CommandBase {
         return cmd;
     }
 
-    private SequentialCommandGroup getScoreClipCmd()
+    private SequentialCommandGroup setScoreSpecimenCmd()
     {
+        state = OutputState.CLIP_SCORED;
         return new SequentialCommandGroup(
+                        outputRotate.setScorePoseCmd(),
                         lifter.startSetPositionCommand(LIFTER_SCORE_POSITION * .5),
                         new WaitCommand(100),
                         clips.setOpenCmd());

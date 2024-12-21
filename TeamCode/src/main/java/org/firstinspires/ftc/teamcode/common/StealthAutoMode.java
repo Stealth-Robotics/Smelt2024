@@ -27,16 +27,16 @@ import org.stealthrobotics.library.opmodes.StealthOpMode;
 public abstract class StealthAutoMode extends StealthOpMode {
 
     // Subsystems for robot control
-    protected FollowerSubsystem followerSubsystem; // For path following
-    protected LifterSubsystem lifterSubsystem; // For controlling the lifter
-    protected ExtenderSubsystem extenderSubsystem; // For controlling the extender
-    protected IntakeSubsystem intakeSubsystem; // For controlling the intake
-    protected ClipsSubsystem clipsSubsystem; // For controlling the clips
+    public static FollowerSubsystem followerSs; // For path following
+    public static LifterSubsystem lifterSs; // For controlling the lifter
+    public static  ExtenderSubsystem extenderSs; // For controlling the extender
+    public static IntakeSubsystem intakeSs; // For controlling the intake
+    public static ClipsSubsystem clipsSs; // For controlling the clips
 
-    protected OutputLiftSubsystem outputLiftSubsystem;
-    protected IntakeElbowSubsystem intakeElbowSubsystem;
-    protected OutputRotationSubsystem outputRotationSubsystem;
-    protected IntakeWristSubsystem intakeWristSubsystem;
+    public static OutputLiftSubsystem outputLiftSs;
+    public static IntakeElbowSubsystem intakeElbowSs;
+    public static OutputRotationSubsystem outputRotateSs;
+    public static IntakeWristSubsystem intakeWristSs;
 
     // Stores a set of commands to be executed on run.
     protected final SequentialCommandGroup commandGroup = new SequentialCommandGroup();
@@ -53,18 +53,18 @@ public abstract class StealthAutoMode extends StealthOpMode {
      */
     @Override
     public void initialize() {
-        followerSubsystem = new FollowerSubsystem(hardwareMap);
-        lifterSubsystem = new LifterSubsystem(hardwareMap);
-        extenderSubsystem = new ExtenderSubsystem(hardwareMap);
-        intakeSubsystem = new IntakeSubsystem(hardwareMap);
-        clipsSubsystem = new ClipsSubsystem(hardwareMap);
+        followerSs = new FollowerSubsystem(hardwareMap);
+        lifterSs = new LifterSubsystem(hardwareMap);
+        extenderSs = new ExtenderSubsystem(hardwareMap);
+        intakeSs = new IntakeSubsystem(hardwareMap);
+        clipsSs = new ClipsSubsystem(hardwareMap);
 
-        outputLiftSubsystem = new OutputLiftSubsystem(hardwareMap,telemetry);
-        intakeElbowSubsystem = new IntakeElbowSubsystem(hardwareMap);
-        outputRotationSubsystem = new OutputRotationSubsystem(hardwareMap);
-        intakeWristSubsystem = new IntakeWristSubsystem(hardwareMap);
+        outputLiftSs = new OutputLiftSubsystem(hardwareMap,telemetry);
+        intakeElbowSs = new IntakeElbowSubsystem(hardwareMap);
+        outputRotateSs = new OutputRotationSubsystem(hardwareMap);
+        intakeWristSs = new IntakeWristSubsystem(hardwareMap);
         // schedules periodic method
-        register(followerSubsystem, lifterSubsystem, extenderSubsystem, intakeSubsystem, intakeElbowSubsystem, intakeWristSubsystem);
+        register(followerSs, lifterSs, extenderSs, intakeSs, intakeElbowSs, intakeWristSs);
     }
 
     /**
@@ -83,7 +83,7 @@ public abstract class StealthAutoMode extends StealthOpMode {
      * @return LifterSubsystem instance
      */
     public LifterSubsystem getLifter() {
-        return lifterSubsystem;
+        return lifterSs;
     }
 
     /**
@@ -91,7 +91,7 @@ public abstract class StealthAutoMode extends StealthOpMode {
      * @return ExtenderSubsystem instance
      */
     public ExtenderSubsystem getExtender() {
-        return extenderSubsystem;
+        return extenderSs;
     }
 
     /**
@@ -99,7 +99,7 @@ public abstract class StealthAutoMode extends StealthOpMode {
      * @return FollowerSubsystem instance
      */
     public FollowerSubsystem getFollower() {
-        return followerSubsystem;
+        return followerSs;
     }
 
 

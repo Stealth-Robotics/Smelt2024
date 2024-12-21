@@ -119,12 +119,12 @@ public class TeleStealth extends StealthOpMode {
         operator.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(extender::resetEncoder);
         operator.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(lifter::resetEncoder);
 
-        operator.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(clips.setOpenCmd());
-        operator.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(clips.setCloseCmd());
+       // operator.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(clips.setOpenCmd());
+        //operator.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(clips.setCloseCmd());
         operator.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(lifter.startSetPositionCommand(1));
         operator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(lifter.startSetPositionCommand(.001));
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(wrist.setStartPositionCmd());
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(clips.toggleCmd());
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(clips.setOpenCmd());
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(clips.setCloseCmd());
 
     }
 

@@ -2,13 +2,10 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.Command;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.stealthrobotics.library.StealthSubsystem;
 //leftbucketdump 0.85
 //leftclip 0.074 //.11
@@ -21,15 +18,21 @@ public class OutputRotationSubsystem extends StealthSubsystem {
     private static final double LEFT_INTAKE_READY_POSITION = 0.48;
     private static final double LEFT_CLIPS_POSITION = .11;
     private static final double LEFT_BUCKET_POSITION = 0.85;
+
+    private static final double LEFT_SCORE_POSITION = .21;
+    private static final double RIGHT_SCORE_POSITION = .71;
     private static final String RIGHT_BUCKET_ROTATE_NAME = "rightbucketrotate";
     private static final double RIGHT_INTAKE_READY_POSITION = 0.46;
     private static final double RIGHT_CLIPS_POSITION = 0.81;
     private static final double RIGHT_BUCKET_POSITION = 0.09;
 
     private enum rotationState {
-        BUCKET,
+        BUCKET_STATE,
         INTAKE_READY,
-        CLIPS
+        CLIPS,
+        SCORE,
+
+        UNKNOWN_STATE
     }
 
     private rotationState state = rotationState.INTAKE_READY;
@@ -64,9 +67,15 @@ public class OutputRotationSubsystem extends StealthSubsystem {
         setRightPosition(RIGHT_CLIPS_POSITION);
     }
     public void setBucket(){
-        state = rotationState.BUCKET;
+        state = rotationState.BUCKET_STATE;
         setLeftPosition(LEFT_BUCKET_POSITION);
         setRightPosition(RIGHT_BUCKET_POSITION);
+    }
+
+    public void setScorePose() {
+        state = rotationState.SCORE;
+        setLeftPosition(LEFT_SCORE_POSITION);
+        setRightPosition(RIGHT_SCORE_POSITION);
     }
 
     public void toggleClips() {
@@ -85,7 +94,7 @@ public class OutputRotationSubsystem extends StealthSubsystem {
     public void toggleBucket() {
         switch (state) {
             case INTAKE_READY:
-                state = rotationState.BUCKET;
+                state = rotationState.BUCKET_STATE;
                 setBucket();
                 break;
 
@@ -94,6 +103,11 @@ public class OutputRotationSubsystem extends StealthSubsystem {
                 setIntakeReady();
 
         }
+    }
+
+    public Command setScorePoseCmd()
+    {
+        return runOnce(this::setScorePose);
     }
 
     public Command setIntakeReadyCmd(){

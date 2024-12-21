@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.commands.presets;
 
 
+import static org.firstinspires.ftc.teamcode.common.StealthAutoMode.outputLiftSs;
+
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 

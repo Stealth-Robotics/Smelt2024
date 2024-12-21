@@ -12,19 +12,19 @@ import org.stealthrobotics.library.Alliance;
  * Example of building a path chain. and chunking it into segments.
  * This allows for doing other operations at the end of each segment like get a sample etc.
  */
-public class OutAndBackPath extends PathManager {
+public class ParkHomePath extends PathManager {
 
     // Sets the default start point for this path. Use Limelight during whileWaitingToStart to
     // update this location in your Command code.
     private static final Pose DEFAULT_START_POINT_BLUE = new Pose(
-            9, 72,
+            9, 66,
             Math.toRadians(0));
 
     private static final Pose DEFAULT_START_POINT_RED = new Pose(
-            FollowerConstants.FIELD_SIZE_X_INCHES - 9,
-            FollowerConstants.FIELD_SIZE_Y_INCHES - 72,
-            Math.toRadians(180));
-    public OutAndBackPath() {
+            9, 66,
+            Math.toRadians(0));
+
+    public ParkHomePath() {
         super(DEFAULT_START_POINT_BLUE);
 
         if (Alliance.isRed()) {
@@ -36,7 +36,6 @@ public class OutAndBackPath extends PathManager {
         // chop up the full path chain into separate path chains
         // so that other operations (like lifter movements) can be done at each segment
         createSegment(0);
-        createSegment(1);
         buildSegments();
     }
 
@@ -47,24 +46,11 @@ public class OutAndBackPath extends PathManager {
                 .addPath(
                         // Line 1
                         new BezierLine(
-                                // You can use hard coded start points so the robot first 
-                                // goes to that location or you can do this to go from where ever 
-                                // the robot is currently at. Down side is that you might run into stuff
-                                new Point(startPose.getX(), startPose.getY(), Point.CARTESIAN),
-                                new Point(48.000, 24.000, Point.CARTESIAN)
+                                new Point(9.000, 66.000, Point.CARTESIAN),
+                                new Point(10.000, 24.000, Point.CARTESIAN)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
-                //.addParametricCallback(.5, ()-> lss.setPosition(.5))
-
-                .addPath(
-                        // Line 2
-                        new BezierLine(
-                                new Point(48.000, 24.000, Point.CARTESIAN),
-                                new Point(9.000, 24.000, Point.CARTESIAN)
-                        )
-                )
-                .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
     }
 
@@ -74,6 +60,6 @@ public class OutAndBackPath extends PathManager {
      */
     protected PathChain buildRedPathChain() {
         // Can just invert the blue chain to get the red chain
-        return invertPathChain(buildBluePathChain());
+        return buildBluePathChain();
     }
 }

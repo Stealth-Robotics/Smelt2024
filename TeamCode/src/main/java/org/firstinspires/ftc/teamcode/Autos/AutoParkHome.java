@@ -4,8 +4,10 @@ import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import org.firstinspires.ftc.teamcode.Paths.PushSamplesPath;
+import org.firstinspires.ftc.teamcode.Paths.ParkHomePath;
+import org.firstinspires.ftc.teamcode.commands.presets.IntakeHomePreset;
 import org.firstinspires.ftc.teamcode.common.StealthAutoMode;
 import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
 
@@ -15,8 +17,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
  * This can later be updated by the limelight if configured so
  */
 
-public class AutoPushSamples extends StealthAutoMode {
-    private PushSamplesPath path;
+@Autonomous(name = "Park Home", group = "Blue")
+public class AutoParkHome extends StealthAutoMode {
+    private ParkHomePath path;
 
     /**
      * Called aft er the Init button is pushed add any specific
@@ -25,8 +28,8 @@ public class AutoPushSamples extends StealthAutoMode {
     @Override
     public void initialize() {
         super.initialize();
-        path = new PushSamplesPath();
-        commandGroup.addCommands(initPath(), runPath());
+        path = new ParkHomePath();
+        commandGroup.addCommands(new IntakeHomePreset(), initPath(), runPath());
     }
 
     /**
@@ -45,7 +48,7 @@ public class AutoPushSamples extends StealthAutoMode {
     protected Command initPath() {
         return new InstantCommand(() ->
         {
-            Follower follower = followerSubsystem.getFollower();
+            Follower follower = followerSs.getFollower();
             follower.setStartingPose(path.getStartPose());
             follower.update();
         });
@@ -62,25 +65,7 @@ public class AutoPushSamples extends StealthAutoMode {
        assert (path.getSegmentCount() == 2);
         return
                 new SequentialCommandGroup(
-                        followerSubsystem.followPathCommand(path.getNextSegment()),
-                        lifterSubsystem.startSetPositionCommand(0.5), // sets moving the arm but does not wait
-                        followerSubsystem.followPathCommand(path.getNextSegment(), true),
-                        doArmMovement()
+                        followerSs.followPathCommand(path.getNextSegment(), 5000, false)
                 );
     }
-
-    /**
-     * Example of combining multiple movements into a single command group
-     * If you find you need to do the same command multiple times a good idea is to do it this way
-     * @return Command to be run
-     */
-    private Command doArmMovement() {
-        return new SequentialCommandGroup(
-                lifterSubsystem.setPositionCommand(0.01, 100),
-                extenderSubsystem.setPositionCommand(0.5, 500),
-                new WaitCommand(1000),
-                extenderSubsystem.setPositionCommand(0.01, 500)
-        );
-    }
-
 }
