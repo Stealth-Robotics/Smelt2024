@@ -1,54 +1,25 @@
 package org.firstinspires.ftc.teamcode.commands.presets;
 
+import static org.firstinspires.ftc.teamcode.common.StealthAutoMode.*;
+
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 
-import org.firstinspires.ftc.teamcode.subsystems.ClipsSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.LifterSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.OutputLiftSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.OutputRotationSubsystem;
 
-import java.util.function.Supplier;
+public class SpecimenGrabPreset extends SequentialCommandGroup {
+    protected static final long ROTATE_DELAY = 500;
+    protected static final double LIFTER_SCORE_POSITION = .51;
 
-public class SpecimenGrabPreset extends OutputPresets {
-    public SpecimenGrabPreset(
-            OutputRotationSubsystem outputRotationSubsystem,
-            OutputLiftSubsystem outputLiftSubsystem,
-            LifterSubsystem lifterSubsystem,
-            ClipsSubsystem clipsSubsystem,
-            Supplier<OutputLiftSubsystem.LiftState> stateSupplier) {
-        super(outputRotationSubsystem, outputLiftSubsystem, lifterSubsystem, clipsSubsystem);
-        switch (stateSupplier.get()) {
-            case INTAKE_READY_BUCKET:
-                addCommands(
-                        clips.setCloseCmd(),
-                        outputLift.setClipGrabCmd(), // Move arm up first
-                        new WaitCommand(ROTATE_DELAY), // wait for bucket to clear hubs
-                        outputRotate.setClipCmd(), // rotate bucket
-                        clips.setOpenCmd()); // open the claws
-                break;
+    public SpecimenGrabPreset() {
 
-            case DUMP_BUCKET:
-                addCommands(
-                        lifter.startSetPositionCommand(LIFTER_INTAKE_POSITION),
-                        clips.setCloseCmd(),
-                        outputLift.setClipGrabCmd(),
-                        outputRotate.setClipCmd(),
-                        clips.setOpenCmd());
-                break;
+        addCommands(
+                clipsSs.setCloseCmd(),
+                new WaitCommand(300),
+                lifterSs.startSetPositionCommand(LIFTER_SCORE_POSITION),
+                new WaitCommand(50),
+                outputLiftSs.setClipScoreCmd(),
+                outputRotateSs.setScorePoseCmd()
+        );
 
-            case CLIP_SCORE:
-                addCommands(
-                        lifter.startSetPositionCommand(LIFTER_INTAKE_POSITION),
-                        new WaitCommand(100),
-                        outputLift.setClipGrabCmd(),
-                        outputRotate.setClipCmd(),
-                        new WaitCommand(100),
-                        clips.setOpenCmd());
-                break;
-            default:
-                addCommands(
-                        clips.setOpenCmd());
-
-        }
     }
 }

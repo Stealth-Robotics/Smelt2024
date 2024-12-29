@@ -62,7 +62,6 @@ public class AutoParkHome extends StealthAutoMode {
      * @return a Command to be run
      */
     private Command runPath() {
-       assert (path.getSegmentCount() == 2);
         return
                 new SequentialCommandGroup(
                         followerSs.followPathCommand(path.getNextSegment(), 5000, false)

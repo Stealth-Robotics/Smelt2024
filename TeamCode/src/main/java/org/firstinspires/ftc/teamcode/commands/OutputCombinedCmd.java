@@ -35,7 +35,7 @@ public class OutputCombinedCmd extends CommandBase {
     protected final LifterSubsystem lifter;
 
     protected static final long ROTATE_DELAY = 500;
-    protected static final double LIFTER_SCORE_POSITION = .55;
+    protected static final double LIFTER_SCORE_POSITION = .51;
     protected static final double LIFTER_DUMP_POSITION = .99;
     protected static final double LIFTER_INTAKE_POSITION = .001;
 
@@ -181,10 +181,11 @@ public class OutputCombinedCmd extends CommandBase {
             case CLIP_GRAB:
             case INTAKE_READY_BUCKET:
             default:
-                cmd.addCommands(clips.setCloseCmd(),
+                cmd.addCommands(
+                        clips.setCloseCmd(),
                         new WaitCommand(300),
                         lifter.startSetPositionCommand(LIFTER_SCORE_POSITION),
-                        new WaitCommand(ROTATE_DELAY),
+                        new WaitCommand(50),
                         outputLift.setClipScoreCmd(),
                         outputRotate.setScorePoseCmd());
 
@@ -211,13 +212,14 @@ public class OutputCombinedCmd extends CommandBase {
             case CLIP_GRAB:
             case INTAKE_READY_BUCKET:
             default:
-                cmd.addCommands(
-                        lifter.startSetPositionCommand(LIFTER_INTAKE_POSITION),
-                        clips.setCloseCmd(),
-                        outputRotate.setIntakeReadyCmd(),
-                        new WaitCommand(ROTATE_DELAY),
-                        outputLift.setDownCmd());
         }
+
+        cmd.addCommands(
+                lifter.startSetPositionCommand(LIFTER_INTAKE_POSITION),
+                clips.setCloseCmd(),
+                outputRotate.setIntakeReadyCmd(),
+                new WaitCommand(ROTATE_DELAY),
+                outputLift.setDownCmd());
 
         return cmd;
     }
@@ -226,9 +228,9 @@ public class OutputCombinedCmd extends CommandBase {
     {
         state = OutputState.CLIP_SCORED;
         return new SequentialCommandGroup(
-                        outputRotate.setScorePoseCmd(),
+                        //outputRotate.setScorePoseCmd(),
                         lifter.startSetPositionCommand(LIFTER_SCORE_POSITION * .5),
-                        new WaitCommand(100),
+                        new WaitCommand(600),
                         clips.setOpenCmd());
     }
 
